@@ -6,21 +6,27 @@ document.getElementById('messageInput').addEventListener('keydown', (event) => {
 });
 
 let typingTimeout;
+let isTypingIndicatorVisible = false;
 
 messageInput.addEventListener('input', () => {
     if (!currentChatUser?.user_id) return;
-    const typingPayload = {
-        msgType: "typing",
-        chat_id: currentChatID,
-        receiver_user_id: currentChatUser.user_id
-    };
-    socket.send(JSON.stringify(typingPayload));
+    // Only send typing event if indicator isn't already visible
+    if (!isTypingIndicatorVisible) {
+        isTypingIndicatorVisible = true;
+        const typingPayload = {
+            msgType: "typing",
+            chat_id: currentChatID,
+            receiver_user_id: currentChatUser.user_id,
+        };
+        socket.send(JSON.stringify(typingPayload));
+    }
     clearTimeout(typingTimeout);
     typingTimeout = setTimeout(() => {
+        isTypingIndicatorVisible = false;
         const stopPayload = {
             msgType: "stopped_typing",
             chat_id: currentChatID,
-            receiver_user_id: currentChatUser.user_id
+            receiver_user_id: currentChatUser.user_id,
         };
         socket.send(JSON.stringify(stopPayload));
     }, 3000);
@@ -84,12 +90,6 @@ const messageHandlers = {
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }, 50);
         }
-        // if (data.msgType === "typing" && data.chat_id === currentChatID) {
-        //     showTypingIndicator(data.typing_nickname || "User");
-        // }
-        // if (data.msgType === "stopped_typing" && data.chat_id === currentChatID) {
-        //     hideTypingIndicator();
-        // }
     },
 
     chatCreated: (data) => {
@@ -121,12 +121,17 @@ const messageHandlers = {
         });
     },
     typing: (data) => {
-        console.log("Typing indicator triggered for:", data.typing_nickname);
-        showTypingIndicator(data.typing_nickname || "User");
+        // Check if the typing user is the one we're currently chatting with
+        if (data.user_id === currentChatUser?.user_id) {
+            showTypingIndicator(data.typing_nickname || "User");
+        }
     },
     stopped_typing: (data) => {
-        hideTypingIndicator();
+        if (data.user_id === currentChatUser?.user_id) {
+            hideTypingIndicator();
+        }
     }
+    
 };
 
 
@@ -236,31 +241,6 @@ function addMessageToChat(pm) {
     createChatBubble(pm, chatMessages, pm.isCreatedBy);
 }
 
-/* 
-function createChatBubble(pm, chatMessages, isSelf) {
-    const msg = pm.message || pm;
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message-bubble${isSelf ? ' self' : ''}`;
-    // Nickname
-    const nicknameDiv = document.createElement('div');
-    nicknameDiv.className = 'message-nickname';
-    nicknameDiv.textContent = msg.sender_nickname || msg.SenderUsername || 'Unknown';
-    // Message Content
-    const contentDiv = document.createElement('div');
-    contentDiv.className = 'message-content';
-    contentDiv.textContent = msg.content;
-    // Timestamp
-    const timestamp = new Date(msg.created_at);
-    const dateTimeString = timestamp.toLocaleString();
-    const timestampDiv = document.createElement('span');
-    timestampDiv.className = 'message-timestamp';
-    timestampDiv.textContent = dateTimeString;
-    messageDiv.appendChild(nicknameDiv);
-    messageDiv.appendChild(contentDiv);
-    messageDiv.appendChild(timestampDiv);
-    chatMessages.appendChild(messageDiv);
-}*/
-
 function createChatBubble(pm, chatMessages, isSelf) {
     const msg = pm.message || pm;
     const messageDiv = document.createElement('div');
@@ -363,7 +343,6 @@ function showTypingIndicator(nickname = "User") {
         typingDiv.innerHTML = `${nickname} is typing <span class="typing-dots"><span class="popcorn">🍿</span>
             <span class="popcorn">🍿</span><span class="popcorn">🍿</span></span>`;
         typingDiv.style.display = 'block';
-        console.log("Typing div display style:", typingDiv.style.display);
     }
 }
 
