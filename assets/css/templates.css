@@ -1,0 +1,132 @@
+/* ----------------------------------------------------------------------------------
+// Header Styles
+// --------------------------------------------------------------------------------*/
+@import url('https://fonts.googleapis.com/css?family=Montserrat:400,800');
+
+header {
+    font-family:'Montserrat', sans-serif;
+    background-color: #272626; 
+    color: #fff;
+    padding: 10px 0; 
+    /* padding: 2vh 0; Use viewport height units for padding */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: fixed; /* Fix header at the top */
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000; /* Ensure header is above other content */
+}
+
+.header-container {
+    max-width: 90%;
+    margin: 0 auto;
+    padding: 0 20px;
+    /* padding: 0 2%; Use percentage for padding */
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 24px;
+    /* font-size: clamp(20px, 4vw, 24px); Responsive font size */
+    font-weight: bold;
+}
+
+nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+}
+
+nav ul li {
+    /* margin-left: 20px; */
+    margin: 0;
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 16px;
+    /* font-size: clamp(14px, 2.5vw, 16px); Responsive font size */
+    transition: color 0.3s ease;
+}
+
+nav ul li a:hover {
+    color: #EBB866; 
+}
+
+/* ----------------------------------------------------------------------------------
+// Footer Styles
+// --------------------------------------------------------------------------------*/
+footer {
+    font-family:'Montserrat', sans-serif;
+    background-color: #272626; 
+    color: #fff; 
+    padding: 12px 0;
+    text-align: center;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.footer-container {
+    max-width: 90%;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex; 
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.footer-container p {
+    margin: 0;
+    font-size: 16px;
+    color: white;
+}
+
+footer nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+footer nav ul li {
+    margin-left: 0;
+    display: flex; 
+    align-items: center;
+    gap: 8px;
+}
+
+footer nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s ease;
+    display: flex;
+    align-items: center; 
+    transition: color 0.3s ease;
+}
+
+footer nav ul li a:hover {
+    color:#EBB866; 
+}
+
+footer nav ul li span.material-icons {
+    font-size: 15px; 
+}

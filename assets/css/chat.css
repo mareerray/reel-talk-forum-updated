@@ -1,0 +1,288 @@
+/* styles.css */
+.chat-container {
+    display: flex; /* Use flexbox to separate user list and chat content */
+    height: 900px;
+    background-color: rgba(230, 216, 216, 0.8); /* Fallback color */
+    background-size: cover; /* Ensure the image covers the entire container */
+    background-position: center; /* Center the image */
+    background-repeat: no-repeat; /* Prevent tiling */
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    position: relative;
+    margin: 80px 50px 0 10px;
+    /* padding-bottom: 10px; */
+}
+
+.user-list-container {
+    width: 25%;
+    min-width: 80px;
+    max-width: 320px;
+    background-color: #f9f9f9;
+    border-right: 1px solid #ddd;
+    overflow-y: auto;
+    box-sizing: border-box;
+    transition: width 0.3s;
+}
+
+.userlist-header {
+    font-weight: bold;
+    margin-top: 10px;
+    color: #333;
+    background: #f1f1f1;
+    border-radius: 3px;
+    padding: 5px 10px;
+}
+
+
+#userList {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+
+#userList li {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 5px;
+    background-color: #f1f1f1;
+    border-radius: 5px;
+    word-wrap: break-word;
+}
+
+/* Responsive: Stack user list above chat on small screens */
+.chat-content {
+    flex-grow: 1; /* Take the remaining space for the chat content */
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    height: 100%;;
+    min-height: 0;
+    min-width: 0; /* Prevent overflow */
+    max-width: 100vw;
+}
+
+.message-list {
+    /* flex-grow: 1; */
+    flex: 1;
+    padding: 20px;
+    min-height: 300px;
+    overflow-y: auto;
+    /* border-bottom: 1px solid #ddd; */
+}
+
+#chatBox{
+    position: relative;
+    /* margin-bottom: 10px; */
+}
+.chat-header {
+    /* background-color: rgb(131, 30, 30); */
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    font-weight: bold;
+    font-style: inherit;
+    text-align: center;
+    color: 333;
+    font-size: 1.2em;
+    color: #333;
+}
+/* Parent container for all messages */
+.chat-bubbles {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 0;
+    max-width: 100%;
+    overflow-x: auto;
+    word-break: break-word;
+}
+/* Base bubble style */
+.message-bubble {
+    position: relative;
+    flex: 1;
+    margin: 2px 0;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: #d1e7dd;
+    max-width: 90vw;
+    align-self: flex-start; /* Default: left side */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    word-break: break-word;
+    overflow-wrap: break-word;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+
+/* Your own messages */
+.message-bubble.self {
+    background: #f1f1f1;
+    align-self: flex-end;   /* Right side */
+    text-align: left;       /* Text remains left-aligned inside bubble */
+}
+
+.message-nickname {
+    font-weight: bold;
+    margin-bottom: 2px;
+    color: #555;
+}
+.message-content {
+    margin-bottom: 2px;
+}
+.message-timestamp {
+    font-size: 0.8em;
+    color: #888;
+    text-align: right;
+}
+
+.message-input {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-top: 1px solid #ddd;
+    box-sizing: border-box;
+    flex-shrink: 0; /* Prevent the input area from shrinking */
+}
+
+.message-input input {
+    flex-grow: 1;
+    font-size: 1rem;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-right: 0;
+    height: 40px;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.message-input button {
+    padding: 0 20px;
+    background-color: rgb(131, 30, 30);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    min-width: 60px;
+    height: 40px;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.message-input button:hover {
+    background-color: #9a1b14;
+}
+
+.typing-indicator {
+    color: #555;
+    border-radius: 4px;
+    padding-left: 13px;
+    margin: 8px 20px -38px 20px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    flex-shrink: 0; /* Prevent the typing indicator from shrinking */
+    align-self: flex-start;
+    max-width: 80%;
+}
+
+.typing-dots {
+    display: inline-flex;
+    gap: 2px;
+    margin-left: 4px;
+}
+
+.popcorn {
+    display: inline-block;
+    font-size: 1.2em;
+    opacity: 0.6;
+    animation: popcorn-bounce 1s infinite;
+}
+
+.popcorn:nth-child(1) { animation-delay: 0s; }
+.popcorn:nth-child(2) { animation-delay: 0.2s; }
+.popcorn:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes popcorn-bounce {
+    0%, 100% { transform: translateY(0); opacity: 0.6; }
+    50% { transform: translateY(-8px); opacity: 1; }
+}
+
+/* @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+} */
+
+/* Error states */
+.chat-error {
+    color: #cc0000;
+    padding: 1rem;
+    background: #ffe6e6;
+    border-radius: 4px;
+    margin: 1rem;
+}
+
+@media (max-width: 1096px) {
+    .chat-container {
+        flex-direction: column;
+        height: calc(100vh - 140px);
+        margin: 20px 0;
+        padding-bottom: 100px;
+    }
+
+    .user-list-container {
+        width: 100%;
+        min-width: 0;
+        max-width: 100vw;
+        border-right: none;
+        border-bottom: 1px solid #ddd;
+        min-height: 60px;
+        max-height: 200px;
+        order: 1;
+        flex-shrink: 0; 
+    }   
+        
+
+    .chat-content {
+        flex: 1;
+        min-height: 300px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .message-bubbles {
+        flex: 1;
+        height: calc(100% - 60px);
+        overflow-y: auto;
+        padding: 10px 0;
+    }
+
+    .message-input {
+        flex-shrink: 0;
+        padding: 10px;
+    }
+}
+
+@media (max-width: 600px) {
+    .message-bubble {
+        max-width: 95vw;
+        font-size: 0.95rem;
+    }
+}
+
+/* Responsive: Stack user list above chat on small screens */
+/* @media (max-width: 1096px) {
+.user-list-container {
+    width: 100%;
+    min-width: 0;
+    max-width: 100vw;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    min-height: 60px;
+    max-height: 200px;
+    order: -1; /* Move user list to top if desired 
+}
+} */

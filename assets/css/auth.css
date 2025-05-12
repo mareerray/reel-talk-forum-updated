@@ -1,0 +1,407 @@
+/* ----------------------------------------------------------------------------------
+// Log-in Page
+// --------------------------------------------------------------------------------*/
+@import url('https://fonts.googleapis.com/css?family=Montserrat:400,800');
+* {
+    box-sizing: border-box;
+}
+body {
+    font-family:'Montserrat', sans-serif;
+    background: #fff;  
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: -20px 0 50px;
+}
+
+body.auth-view .bg-container {
+    display: none;
+}
+
+h1 {
+    font-weight: bold;
+    font-size: 35px;
+    margin: 0;
+    margin-bottom: 10px;
+    color: #333;
+}
+/* Heading Styles */
+
+p {
+    font-size: 16px;
+    font-weight: 100;
+    /* line-height: 20px;
+    letter-spacing: 0.5px;
+    margin: 20px 0 30px; */
+    color: #333;
+}
+span {
+    font-size: 14px;
+    font-weight: 300;
+    color: #666;
+    margin-bottom: 20px;
+}
+a {
+    color:#333;
+    font-size: 14px;
+    text-decoration: none;
+    margin: 15px 0;
+}
+
+.form-container {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    transition: all 0.6s ease-in-out;
+}
+
+.form-container form {
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    /* padding: 0 50px; */
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    max-width:600px;
+    margin-bottom: 15px;
+    /* margin: 0 auto; */
+}
+
+.form-group {
+    display: flex;
+    justify-content: space-between;  /* Space out labels and inputs */
+    margin-bottom: 15px;  /* Space between form rows */
+    align-items: center; /* Vertically align labels and inputs */
+}
+
+/* Button Styling */
+.form-container button {
+    border-radius: 20px;
+    border: 1px solid #FF4B2B;
+    background-color: #FF4B2B;
+    color: #FFFFFF;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 12px 45px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+	transition: transform 80ms ease-in;
+    cursor: pointer;
+    width: 50%;
+    margin-top: 10px;
+}
+
+.form-container button:active {
+	transform: scale(0.95);
+}
+
+.form-container button:focus {
+	outline: none;
+}
+
+.form-container button:hover {
+    background-color: #e13213;
+}
+
+/* Form Styles */
+.form-container {
+	position: absolute;
+	top: 0;
+	height: 100%;
+	transition: all 0.6s ease-in-out;
+}
+
+.radio-group {
+    display: flex;
+    align-items: center;
+    justify-content: center; 
+    width: 100%; 
+    font-size: 14px;
+    margin-left: 0;
+}
+
+.radio-group input[type="radio"] {
+    appearance: none; 
+    -webkit-appearance: none; 
+    width:0.00001px; /* Let the radio button size be automatic */
+    height:0.00001px;
+    border: 2px solid #ccc;
+    border-radius: 45%;
+    margin-right: 10px;
+    outline:none;
+    cursor: pointer;
+
+}
+
+.radio-group input[type="radio"]:checked {
+    background-color:#e13213;
+    ; 
+}
+
+.radio-group label {
+    cursor: pointer; 
+    font-weight: normal;
+    margin-right: 25px;
+}
+
+.radio-group .label-gender {
+    font-weight: bold;
+    margin-right: 50px;
+    margin-left: 25px;
+}
+
+.sign-in-container {
+	left: 0;
+	width: 50%;
+	z-index: 2;
+    .password-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+    
+    .password-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+    
+    .password-wrapper input {
+        flex: 1;
+        padding-right: 300px;/* space for the eye icon */
+    }
+    
+    .toggle-password {
+        position: absolute;
+        right: 10px;
+        top: 50%; /* moves it 50% from the top */
+        transform: translateY(-50%); /* pulls it up by 50% of its own height */
+        cursor: pointer;
+        user-select: none;
+        color: #555;
+        font-size: 18px; /* adjust size as needed */
+    }
+}
+
+.sign-up-container {
+    position: absolute;
+    left: 0;
+    width: 50%;
+    opacity: 0;
+    z-index: 1;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    background-color: #fff;  /* Optional background for the container */
+    padding: 40px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    .password-wrapper {
+        position: relative;
+        width: 470px;
+    }
+    
+    .password-wrapper input {
+        width: 100%;
+        padding-right: 4px; /* space for the icon */
+        box-sizing: border-box;
+    }
+    
+    .toggle-password {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        user-select: none;
+        font-size: 18px; /* or 24px, 30px, etc. */
+        color: #666;
+    
+    }
+}
+
+.sign-up-container.active {
+    opacity: 1;
+    z-index: 5;
+    transform: translateX(0);
+}
+
+/* Input Group Styles */
+.input-group {
+    width: 500px;
+    display: flex;
+    align-items: center;  /* Align label and input vertically in the center */
+    margin-bottom: 15px;  /* Adds 15px space below each input group */
+    
+}
+
+.input-group label {
+    font-size: 14px;
+    margin-bottom: 5px;
+    display: block;
+    color: #333;
+    font-weight: bold;
+    width: 120px; /* Fixed width for labels */
+    text-align: right; /* Align the text of labels to the right */
+    margin-right: 10px; /* Space between label and input */
+    margin-top: 10px;
+    font-weight: bold; /* Optionally bold the labels */
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    margin: 3px 0;
+    background-color: #f3f3f3;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    flex: 1;
+}
+
+input { 
+	background-color: #eee;
+	border: none;
+	padding: 12px 15px;
+	margin: 8px 0;
+	width: 600px; 
+    border-radius: 5%;
+}
+
+
+.input-group input:focus {
+    border-color: #e13213;
+    outline: none;
+}
+
+
+/* Remove extra margins between elements */
+.input-group:last-child {
+    margin-bottom: 0;
+}
+
+.container.right-panel-active .sign-in-container {
+    transform: translateX(100%);
+}
+
+.container.right-panel-active .sign-up-container {
+    transform: translateX(100%);
+    opacity: 1;
+    z-index: 5;
+    animation: show 0.6s;
+}
+
+@keyframes show {
+    0%,
+    49.99% {
+        opacity: 0;
+        z-index: 1;
+    }
+
+    50%,
+    100% {
+        opacity: 1;
+        z-index: 5;
+    }
+}
+
+.overlay-container {
+	position: absolute;
+	top: 0;
+	left: 50%;
+	width: 50%;
+	height: 100%;
+	overflow: hidden;
+	transition: transform 0.6s ease-in-out;
+	z-index: 100;
+}
+
+.container.right-panel-active .overlay-container {
+    transform: translateX(-100%);
+}
+
+.overlay {
+    background-color: #e03f22;
+    /* background: linear-gradient(45deg, rgba(224, 63, 34, 1), rgba(224, 63, 34, 0.7)); */
+	background-repeat: no-repeat;
+	background-size: cover;
+	background-position: 0 0;
+	color: #FFFFFF;
+	position: relative;
+	left: -100%;
+	height: 100%;
+	width: 200%;
+    transform: translateX(0);
+	transition: transform 0.6s ease-in-out;
+} 
+
+.container.right-panel-active .overlay {
+    transform: translateX(50%);
+}
+
+.overlay-panel {
+	position: absolute;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	padding: 0 40px;
+	text-align: center;
+	top: 0;
+	height: 100%;
+	width: 50%;
+	transform: translateX(0);
+	transition: transform 0.6s ease-in-out;
+}
+.overlay-right {
+	right: 0;
+	transform: translateX(0);
+}
+
+.container.right-panel-active .overlay-right {
+    transform: translateX(20%);
+}
+
+.overlay-left {
+	transform: translateX(-20%);
+} 
+
+.container.right-panel-active .overlay-left {
+    transform: translateX(0);
+}
+
+.show {
+    display: block;
+}
+
+.hide {
+display: none;
+}
+
+.overlay-container button {
+    border-radius: 20px;
+    border: 1px solid #FF4B2B;
+    background-color: #FF4B2B;
+    color: #FFFFFF;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 12px 45px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+	transition: transform 80ms ease-in;
+    cursor: pointer;
+    width: 50%;
+    margin-top: 10px;
+
+}
+.overlay-container button.ghost {
+	background-color: rgba(224, 63, 30);
+	border-color: #d1c2b8;
+}
+
+.overlay-container button.ghost:hover{
+	background-color: transparent;
+	border-color: #d1c2b8;
+}

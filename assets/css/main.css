@@ -1,0 +1,604 @@
+/* ----------------------------------------------------------------------------------
+// General Styles
+// --------------------------------------------------------------------------------*/
+@import url('https://fonts.googleapis.com/css?family=Montserrat:400,800');
+* {
+    box-sizing: border-box;
+}
+
+html{
+    overflow: auto;
+    overscroll-behavior: none;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.bg-container {
+    position: fixed;
+    top: 0; 
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    background-image: url('/assets/images/seatsmovietheater.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+body.main-view .bg-container {
+    display: block; /* Show background for main view */
+}
+
+#mainView {
+    font-family:'Montserrat', sans-serif;
+    height: 100%;
+    width: 100%;
+    margin: 20px;
+}
+.main-container {
+    display: grid;
+    grid-template-columns: 15% auto 40%;
+    padding-top: 20px;
+    height: 100%;
+}
+
+/* For screens ≤ 1500px, reduce sidebars and increase main content */
+@media (max-width: 1500px) {
+    .main-container {
+        grid-template-columns: 20% 1fr 30%;
+        margin-top: 30px;
+        gap: 10px;
+    }
+}
+
+    /* For screens ≤ 1096px, stack columns vertically */
+@media (max-width: 1096px) {
+    .bg-container {
+        background-attachment: scroll; 
+    }
+    .main-container {
+        grid-template-columns: 1fr;
+        margin-top: 10px;
+        padding-top: 60px;
+        gap: 0;
+    }
+    .category-bar,
+    .middle-container,
+    .chat-container {
+        margin: 0;
+        max-width: 100vw;
+        padding: 8px 2vw;
+    }
+}
+/* --------------------------------------------------------------------------------*/
+
+.category-bar {
+    margin-top: 100px;
+    margin-left: 40px;
+}
+
+.category-bar h3 {
+    color: white;
+    font-size: 20px;
+    text-align: center;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.category-bar ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.category-bar button {
+    border: none;
+    background: none;
+    margin: 8px 0;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 6px 16px;
+}
+.category-bar button:hover {
+    color: #999;
+}
+/* Grid layout for screens ≤ 1096px */
+@media (max-width: 1096px) {
+    .category-bar ul {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr); /* 3 columns */
+        grid-auto-rows: minmax(40px, auto); /* Responsive row height */
+        gap: 8px;
+    }
+
+    .category-bar li {
+        margin: 0; 
+    }
+
+    .category-bar button {
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        padding: 10px 5px;
+    }
+}
+
+/* --------------------------------------------------------------------------------*/
+
+.middle-container {
+    border-radius: 8px;
+    padding: 24px 12px;
+    width: 100%;             /* ensure it fills the grid area */
+    box-sizing: border-box;
+}
+.tab-content,
+.post-grid,
+.create-post-container {
+    width: 100%;         /* Fill the parent (e.g., .middle-container) */
+    max-width: 1000px;    /* Or whatever width you prefer */
+    min-width: 300px;    /* Optional: prevents being too narrow */
+    margin: 0 auto;      /* Center horizontally */
+    box-sizing: border-box;
+}
+
+.page-title {
+    margin-top: 50px;
+    margin-bottom: 30px;
+    font-size: 2rem;
+    color: white !important;
+    text-align: center;
+}
+
+.nav-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    color: white;
+    background-color: transparent;
+    list-style: none;
+    padding: 0;
+
+}
+
+.nav-item {
+    margin-bottom: 0;
+    display: flex;
+    flex: 1 1 0;
+}
+
+.nav-link{
+    width: 100%;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-items: center;
+    color: white;
+    background-color: transparent;
+    border: 1px solid white;
+    transition: background-color 0.3s ease;
+    border: 1px solid white;
+    border-radius: 4px 4px 0 0;
+    background: transparent;
+    padding: 10px 24px;
+    cursor: pointer;
+    font-size: 1rem;
+    /* transition: background 0.2s, color 0.2s; */
+}
+
+.nav-tabs .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: white;
+    color: white;
+}
+
+.nav-tabs .nav-link.active {
+    color: #333;
+    background-color: white;
+    border-color: white;
+    border: 1px solid white;
+    z-index: 2;
+}
+
+.nav-tabs .nav-link:not(.active) {
+    border-color: white; 
+}
+
+.nav-link:not(.active):hover {
+    color: #e2e6ea; 
+}
+
+.tab-pane { 
+    display: none; 
+
+}
+
+.tab-pane.active { 
+    display: block; 
+}
+
+/* Responsive: Stack tabs on small screens */
+@media (max-width: 600px) {
+    .nav-tabs {
+        flex-direction: column;
+        gap: 0;
+    }
+    .nav-item {
+        width: 100%;
+    }
+    .nav-link {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 4px;
+        border-radius: 4px;
+    }
+}
+
+/* --------------------------------------------------------------------------------*/
+
+.post-grid {
+    gap: 3px; /* Controls spacing between posts */
+    /* max-width: 1000px; */
+    overflow-y: auto;
+    max-height: 850px; 
+    margin: 0 auto;
+    padding: 5px 10px;
+    scrollbar-width: thin;
+    scrollbar-color: whitesmoke #999; /* thumb color, track color */
+}
+
+.post-container {
+    background-color: rgba(255, 255, 255, 0.899);
+    margin: 5px auto 0 ;
+    padding: 20px;
+    height: 160px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    font-size: 12px;
+}
+
+.post-title {
+    color: #333;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    /* word-wrap: break-word;
+    overflow-wrap: break-word; */
+    max-width: 100%;
+    margin-bottom: 5px;
+}
+
+.post-title:hover {
+    color: rgb(131, 30, 30);
+}
+
+.post-categories, .post-info {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.post-content {
+    flex-grow: 1;
+    margin: 8px 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-height: 200px; 
+    font-size: 0.9rem;
+}
+
+.read-button {
+    color: #333;
+    text-decoration: underline;
+    align-items: center;
+    margin: 0;
+}
+
+.single-post-container {
+    background-color: rgba(255, 255, 255, 0.899);
+    margin: 10px auto 0 ;
+    padding: 20px;
+    /* max-width: 800px; */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    font-size: 12px;
+}
+
+.comments-section {
+    border-top: 1px solid #dee2e6;
+    padding-top: 20px;
+}
+
+.comment {
+    margin: 10px 0;
+    padding: 10px;
+    border: #6c757d 1px solid;
+    border-radius: 5px;
+}
+
+.comment p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.comments-section h3, .add-comment h4 {
+    color: #333;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.add-comment textarea {
+    width: 100%;
+    height: 100px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 10px;
+    resize: none;
+}
+
+.back-to-post-button{
+    background-color: transparent; /* Normal state: grey background */
+    border: 1px solid grey; /* Optional: match border to background for seamless look */
+    color: #333; /* Text color, adjust as needed */
+    transition: background-color 0.3s, border-color 0.3s; /* Smooth transition */
+    margin-bottom: 10px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 12px 45px;
+
+}
+
+.back-to-post-button:hover {
+    background-color: grey; /* Hover state: transparent background */
+    border-color: grey; /* Keep border grey or change as desired */
+    color: #ced4da;
+}
+
+.submit-comment {
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: block;
+    /* margin: 30px auto 0; */
+    min-width: 150px;
+}
+
+.submit-comment:hover {
+    background-color: #999;
+}
+
+#submit-comment:active {
+    background-color: #999;
+    transform: translateY(1px);
+}
+
+/* --------------------------------------------------------------------------------*/
+
+.profile-tab-container {
+    width: 100%;
+    max-width: 1000px; /* or 900px, to match your other sections */
+    margin: 8px auto;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+}
+
+.profile-tab-container h1 {
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+
+.profile-tab-container p {
+    font-size: 16px;
+    margin-bottom: 10px;
+    padding: 5px 0;
+}
+
+/* --------------------------------------------------------------------------------*/
+
+/* Create Post Form Styling */
+#create-post-content {
+    color: white;
+    padding: 20px;
+}
+
+#create-post-content .tab-container {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    padding: 25px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    color: #333;
+    /* max-width: 800px; */
+    margin: 0 auto;
+}
+
+#create-post-content h2 {
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+    color: #333;
+    text-align: center;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 15px;
+}
+
+#create-post-form .form-group {
+    margin-bottom: 20px;
+}
+
+#create-post-form label {
+    display: block;
+    margin-bottom: 8px;
+    margin-right: 10px;
+    font-weight: 600;
+    color: #333;
+    font-size: 1rem;
+}
+
+#create-post-form input[type="text"],
+#create-post-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.95rem;
+    transition: border-color 0.3s ease;
+    
+}
+
+#create-post-form input[type="text"]:focus,
+#create-post-form textarea:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+#create-post-form textarea {
+    min-height: 150px;
+    max-height: 400px;
+    resize: none;
+    
+}
+
+/* Category selection styling */
+.categories-selection {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Creates 3 equal columns */
+    grid-template-rows: repeat(5, auto); /* Creates 5 rows that adjust to content */
+    gap: 10px; 
+    margin-top: 10px;
+    margin-bottom: 15px;
+    width: 100%; /* Ensure the container takes full width of its parent */
+    box-sizing: border-box; /* Ensure padding doesn't add to width */
+}
+
+/* Update your category-checkbox styling */
+.category-checkbox {
+    display: flex;
+    align-items: center;
+    background-color: transparent; /* Remove background as requested */
+    padding: 2px 5px; /* Reduce padding */
+    border: none; /* Remove border */
+    cursor: pointer;
+    box-sizing: border-box; /* Ensure padding doesn't add to width */
+    overflow: hidden; /* Prevent text overflow */
+    white-space: nowrap; /* Keep text on one line */
+    text-overflow: ellipsis; /* Add ellipsis for overflowing text */
+}
+
+.category-checkbox input[type="radio"] {
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.category-checkbox label {
+    margin-bottom: 0;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 5px;
+    grid-column: 1 / -1; /* Make error message span all columns */
+}
+
+/* Submit button styling */
+#submit-post {
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: block;
+    margin: 30px auto 0;
+    min-width: 150px;
+}
+
+#submit-post:hover {
+    background-color: #999;
+}
+
+#submit-post:active {
+    background-color: #999;
+    transform: translateY(1px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #create-post-content .tab-container {
+        padding: 15px;
+    }
+    
+    #create-post-form input[type="text"],
+    #create-post-form textarea {
+        padding: 10px;
+    }
+    
+    .category-checkbox {
+        padding: 6px 10px;
+        font-size: 0.85rem;
+    }
+    
+    #submit-post {
+        padding: 10px 20px;
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 900px) {
+    .main-container {
+        grid-template-columns: 1fr; /* Stack columns on small screens */
+        margin-top: 20px;
+    }
+    .category-bar, .middle-container, .chat-container {
+        margin: 0;
+        width: 100%;
+        max-width: 100vw;
+    }
+}
+
+@media (max-width: 600px) {
+    .main-container {
+        grid-template-columns: 1fr;
+        margin-top: 10px;
+    }
+    .category-bar, .middle-container, .chat-container {
+        padding: 8px 2vw;
+        font-size: 0.95rem;
+    }
+}
+
+/* Best Practice Responsive Breakpoints
+Based on industry standards and your sources:
+
+≥1200px: Large desktops
+
+992px–1199px: Laptops/desktops
+
+768px–991px: Tablets
+
+≤767px: Mobile */

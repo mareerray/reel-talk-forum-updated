@@ -1,0 +1,290 @@
+import (
+	"database/sql"
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
+	"real-time-forum/model"
+	"real-time-forum/utils"
+	"strconv"
+	"strings"
+	"time"
+)
+
+// helper function to respond with JSON
+func respondJSON(w http.ResponseWriter, status int, payload interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(payload)
+}
+
+func GetUsersHandler(w http.ResponseWriter, r *http.Request) {
+	var sessionToken string
+	// 1. Get session token from Authorization header first
+	authHeader := r.Header.Get("Authorization")
+	if authHeader != "" {
+		sessionToken = strings.TrimPrefix(authHeader, "Bearer ")
+	} else {
+		// Fallback to cookie
+		cookie, err := r.Cookie("session_token")
+		if err == nil {
+			sessionToken = cookie.Value
+		}
+	}
+	if sessionToken == "" {
+		respondJSON(w, http.StatusUnauthorized, map[string]any{
+			"success": false,
+			"message": "Authorization required",
+			"hint":    "Include 'Authorization: Bearer <token>' header or session_token cookie",
+		})
+		return
+	}
+
+	// 2. Validate session token against sessions table
+	user, expiry, err := utils.SelectSession(sessionToken)
+	if err != nil || time.Now().After(expiry) {
+		respondJSON(w, http.StatusUnauthorized, map[string]any{
+			"success": false,
+			"message": "Invalid or expired session",
+		})
+		return
+	}
+
+	// 3. Fetch users
+	var msg model.WSMessage
+
+	msg.ChattedUsers, msg.UnchattedUsers, err = ReadAllUsers(user.ID)
+	if msg.ChattedUsers == nil {
+		msg.ChattedUsers = []model.ChatUser{}
+	}
+	if msg.UnchattedUsers == nil {
+		msg.UnchattedUsers = []model.ChatUser{}
+	}
+	if err != nil {
+		fmt.Println("Error getting list of users:", err)
+		respondJSON(w, http.StatusInternalServerError, map[string]any{
+			"success": false,
+			"message": "Failed to retrieve users",
+		})
+		return
+	}
+
+	// Set online status for each user
+	for i := range msg.ChattedUsers {
+		if _, ok := Clients[strconv.Itoa(msg.ChattedUsers[i].UserID)]; ok {
+			msg.ChattedUsers[i].IsOnline = true
+		}
+	}
+	log.Printf("Prepared listOfChat: %d chatted, %d unchatted",
+		len(msg.ChattedUsers), len(msg.UnchattedUsers))
+
+	for i := range msg.UnchattedUsers {
+		if _, ok := Clients[strconv.Itoa(msg.UnchattedUsers[i].UserID)]; ok {
+			msg.UnchattedUsers[i].IsOnline = true
+		}
+	}
+
+	msg.MsgType = "listOfChat"
+	msg.Updated = false
+	// msg.UserID = UserId
+
+	Broadcast <- msg
+
+	// Send via HTTP response (for initial load)
+	respondJSON(w, http.StatusOK, map[string]any{
+		"success":        true,
+		"chattedUsers":   msg.ChattedUsers,
+		"unchattedUsers": msg.UnchattedUsers,
+	})
+	fmt.Print("Sending Request")
+	log.Printf("Clients map: %+v", Clients) // In GetUsersHandler
+	log.Printf("Broadcasting listOfChat to %v", user.ID)
+	fmt.Println("Responding with users:", len(msg.ChattedUsers), len(msg.UnchattedUsers))
+
+}
+
+// chatHandler.go
+func GetOrCreateChatHandler(w http.ResponseWriter, r *http.Request) {
+	loginStatus, currentUser, _, validateErr := utils.ValidateSession(w, r)
+	if !loginStatus || validateErr != nil {
+		respondJSON(w, http.StatusUnauthorized, map[string]any{"success": false})
+		return
+	}
+
+	receiverIDStr := r.URL.Query().Get("user_id")
+	receiverID, err := strconv.Atoi(receiverIDStr)
+	if err != nil {
+		respondJSON(w, http.StatusNotFound, map[string]any{"success": false})
+		return
+	}
+
+	// Find existing chat
+	chatID, err := FindChatIDbyUserIDS(currentUser.ID, receiverID)
+
+	if err != nil && err != sql.ErrNoRows {
+		respondJSON(w, http.StatusInternalServerError, map[string]any{"success": false})
+		return
+	}
+
+	// Create new chat if none exists
+	if chatID == 0 {
+		chatID, err = InsertChat(currentUser.ID, receiverID)
+		if err != nil {
+			respondJSON(w, http.StatusInternalServerError, map[string]any{"success": false})
+			return
+		}
+	}
+
+	log.Printf("[DEBUG] CurrentUserID: %d | ReceiverID: %d", currentUser.ID, receiverID)
+
+	respondJSON(w, http.StatusOK, map[string]any{
+		"success":  true,
+		"chat_id": chatID,
+	})
+}
+
+func SendMessageHandler(w http.ResponseWriter, r *http.Request) {
+	loginStatus, sendUser, _, validateErr := utils.ValidateSession(w, r)
+	if !loginStatus || validateErr != nil {
+		respondJSON(w, http.StatusUnauthorized, map[string]any{"success": false})
+		return
+	}
+
+	// 1. Parse and Validate Query Parameters
+	chatIDStr := r.URL.Query().Get("chat_id")
+	receiverUserIDStr := r.URL.Query().Get("receiver_user_id")
+
+	if chatIDStr == "" || receiverUserIDStr == "" {
+		respondJSON(w, http.StatusBadRequest, map[string]any{
+			"success": false,
+			"message": "Missing chat_id or receiver_user_id",
+		})
+		return
+	}
+
+
+	chatID, err := strconv.Atoi(chatIDStr)
+	if err != nil {
+		respondJSON(w, http.StatusBadRequest, map[string]any{
+			"success": false,
+			"message": "Invalid chat_id",
+		})
+		return
+	}
+
+	receiverUserID, err := strconv.Atoi(receiverUserIDStr)
+	if err != nil {
+		respondJSON(w, http.StatusBadRequest, map[string]any{
+			"success": false,
+			"message": "Invalid receiver_user_id",
+		})
+		return
+	}
+
+	// 2. Parse Message Content
+	var dataReq struct {
+		Content string `json:"content"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&dataReq); err != nil {
+		respondJSON(w, http.StatusBadRequest, map[string]any{"success": false})
+		return
+	}
+
+	if dataReq.Content == "" {
+		respondJSON(w, http.StatusBadRequest, map[string]any{
+			"success": false,
+			"message": "Empty message not accepted",
+		})
+		return
+	}
+
+	// 3. Insert the Message
+	if err := InsertMessage(dataReq.Content, sendUser.ID, chatID); err != nil {
+		respondJSON(w, http.StatusInternalServerError, map[string]any{"success": false})
+		return
+	}
+
+	// Create and broadcast message
+	msg := model.WSMessage{
+		MsgType:        "sendMessage",
+		Updated:        false,
+		UserID:         sendUser.ID,
+		ReceiverUserID: receiverUserID,
+		PrivateMessage: model.PrivateMessage{
+			IsCreatedBy: true,
+			Message: model.Message{
+				CreatedAt:      time.Now(),
+				SenderUsername: sendUser.Nickname,
+				Content:        dataReq.Content,
+				ChatID:         chatID,
+			},
+		},
+	}
+
+	Broadcast <- msg
+
+	// 5. Respond to the Client
+
+	respondJSON(w, http.StatusOK, map[string]any{
+		"success":   true,
+		"chatID":  	chatID,
+		"message":   dataReq.Content, // Include actual message content
+		"sender":    sendUser.Nickname,
+		"createdAt": time.Now().Format(time.RFC3339),
+	})
+
+}
+
+func ShowMessagesHandler(w http.ResponseWriter, r *http.Request) {
+	// Validate session first
+	loginStatus, currentUser, _, validateErr := utils.ValidateSession(w, r)
+	if !loginStatus || validateErr != nil {
+		respondJSON(w, http.StatusUnauthorized, map[string]any{"success": false})
+		return
+	}
+
+	// Parse and Validate chat_id
+	chatIDStr := r.URL.Query().Get("chat_id")
+	if chatIDStr == "" {
+		respondJSON(w, http.StatusBadRequest, map[string]any{
+			"success": false,
+			"message": "Missing chat_id parameter",
+		})
+		return
+	}
+
+	chatID, err := strconv.Atoi(chatIDStr)
+		if err != nil {
+			respondJSON(w, http.StatusBadRequest, map[string]any{
+				"success": false,
+				"message": "Invalid chat_id",
+			})
+			return
+	}
+
+	// Parse number of messages from query
+
+	numberOfMessages := 10 // Default value
+	if numStr := r.URL.Query().Get("NumberOfMessages"); numStr != "" {
+		if n, err := strconv.Atoi(numStr); err == nil {
+			numberOfMessages = n
+		}
+	}
+	// Pass currentUser.ID as the third argument
+	messages, err := ReadAllMessages(chatID, numberOfMessages, currentUser.ID)
+	if err != nil {
+		log.Printf("Error retrieving messages: %v", err)
+		respondJSON(w, http.StatusInternalServerError, map[string]any{
+			"success": false,
+			"message": "Failed to retrieve messages",
+		})
+		return
+	}
+
+	respondJSON(w, http.StatusOK, map[string]any{
+		"success":  true,
+		"messages": messages,
+	})
+}
+
+
