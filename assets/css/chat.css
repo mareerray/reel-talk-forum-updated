@@ -1,4 +1,5 @@
 /* styles.css */
+
 .chat-container {
     display: flex; /* Use flexbox to separate user list and chat content */
     height: 900px;
@@ -10,7 +11,7 @@
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     position: relative;
-    margin: 80px 50px 0 10px;
+    margin: 120px 50px 0 10px;
     /* padding-bottom: 10px; */
 }
 
@@ -95,8 +96,14 @@
     gap: 8px;
     padding: 10px 0;
     max-width: 100%;
-    overflow-x: auto;
+    height: 100%;
+    max-height: calc(100% - 60px);
     word-break: break-word;
+    overscroll-behavior: contain;
+    overflow-x: auto;
+    overflow-y: scroll !important; /* Instead of auto */
+    scrollbar-width: thin; /* For Firefox */
+    scrollbar-color: rgba(0,0,0,0.2) transparent; /* For Firefox */
 }
 /* Base bubble style */
 .message-bubble {
@@ -111,7 +118,8 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.04);
     word-break: break-word;
     overflow-wrap: break-word;
-    overflow-y: auto;
+    overflow: visible;
+    /* overflow-y: auto; */
     box-sizing: border-box;
 }
 
@@ -282,6 +290,33 @@
         font-size: 0.95rem;
     }
 }
+
+.scroll-to-bottom {
+    position: absolute;
+    bottom: 200px; /* Position above the message input */
+    right: 18px;
+    background-color: rgb(131, 30, 30); /* Matches your send button color */
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 10;
+}
+
+.scroll-to-bottom.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 
 /* The cubic-bezier function defines a curve using four points: 
 P0(0,0), P1(0.38,0.97), P2(0.56,0.76), and P3(1,1). 

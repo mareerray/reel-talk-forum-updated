@@ -209,7 +209,7 @@ func ReadAllUsers(userID int) ([]model.ChatUser, []model.ChatUser, error) {
 }
 
 // ReadAllMessages retrieves the last N messages from a chat
-func ReadAllMessages(chatID int, numberOfMessages int, userID int) ([]model.PrivateMessage, error) {
+func ReadAllMessages(chatID int, numberOfMessages int, userID int, offset int) ([]model.PrivateMessage, error) {
 	var lastMessages []model.PrivateMessage
 
 	// Query messages along with the sender's username
@@ -227,8 +227,8 @@ func ReadAllMessages(chatID int, numberOfMessages int, userID int) ([]model.Priv
             ON m.user_id_from = u.id
         WHERE m.chat_id = ?
         ORDER BY m.id DESC
-        LIMIT ?;
-    `, chatID, numberOfMessages)
+        LIMIT ? OFFSET ?;
+    `, chatID, numberOfMessages, offset)
 
 	if selectError != nil {
 		fmt.Println("Select error at ReadAllMessages:", selectError)

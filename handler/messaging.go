@@ -85,7 +85,7 @@ func handleSendMessage(conn *websocket.Conn, msg model.WSMessage, user model.Use
 	}
 
 	// Fetch the newly created message with timestamp
-	messages, err := ReadAllMessages(msg.PrivateMessage.Message.ChatID, 1, user.ID)
+	messages, err := ReadAllMessages(msg.PrivateMessage.Message.ChatID, 1, user.ID, 0)
 	if err != nil {
 		log.Printf("Failed to fetch new message: %v", err)
 		return err
@@ -166,15 +166,27 @@ func handleGetMessages(conn *websocket.Conn, msg model.WSMessage, user model.Use
     }
 
     numberOfMessages := 10 // Default
-    if msg.NumberOfReplies > 0 { // Use field from WSMessage
-        numberOfMessages = msg.NumberOfReplies
+    // if msg.NumberOfReplies > 0 { // Use field from WSMessage
+    //     numberOfMessages = msg.NumberOfReplies
+    // }
+
+	// Calculate offset based on number of messages requested
+    // For first page (10 messages), offset = 0
+    // For second page (20 messages), offset = 10
+    // For third page (30 messages), offset = 20
+	offset := 0
+    if msg.NumberOfReplies > 10 {
+        offset = msg.NumberOfReplies - numberOfMessages
     }
 
-    messages, err := ReadAllMessages(chatID, numberOfMessages, user.ID)
+    messages, err := ReadAllMessages(chatID, numberOfMessages, user.ID, offset)
     if err != nil {
         log.Printf("Error reading messages: %v", err)
         return err
     }
+	log.Printf("Fetching messages for chat %d with limit %d and offset %d", 
+			chatID, numberOfMessages, offset)
+
 
     return conn.WriteJSON(model.WSMessage{
         MsgType: "messages",

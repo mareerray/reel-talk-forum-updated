@@ -7,6 +7,8 @@ document.getElementById('messageInput').addEventListener('keydown', (event) => {
 
 let typingTimeout;
 let isTypingIndicatorVisible = false;
+let currentMessagePage = 1;
+const messagesPerPage = 10;
 
 messageInput.addEventListener('input', () => {
     if (!currentChatUser?.user_id) return;
@@ -101,24 +103,47 @@ const messageHandlers = {
         currentChatID = data.privateMessage.message.chat_id;
         console.log("Chat created with ID:", currentChatID);
         
+         // Use the existing loadMoreMessages function
+        loadMoreMessages(currentChatID, 10);
 
-        socket.send(JSON.stringify({
-            msgType: "getMessages",
-            privateMessage: {
-                message: {
-                    chat_id: currentChatID 
-                }
-            },
-            numberOfReplies: 10
-        }));
+        // socket.send(JSON.stringify({
+        //     msgType: "getMessages",
+        //     privateMessage: {
+        //         message: {
+        //             chat_id: currentChatID 
+        //         }
+        //     },
+        //     numberOfReplies: 10
+        // }));
     },
     messages: (data) => {
+        const chatMessages = document.querySelector('.chat-bubbles');
+        const oldHeight = chatMessages ? chatMessages.scrollHeight : 0;
+        const oldScrollPosition = chatMessages ? chatMessages.scrollTop : 0;
         showChat({
             receiverUserID: currentChatUser.user_id,
             receiverUserName: currentChatUser.nickname,
             chatID: currentChatID,
             privateMessages: data.messages
         });
+        // If this was a "load more" request (not the initial load)
+        if (currentMessagePage > 1 && chatMessages) {
+            // Calculate new position to maintain the same relative position
+            const newHeight = chatMessages.scrollHeight;
+            const heightDifference = newHeight - oldHeight;
+            chatMessages.scrollTop = oldScrollPosition + heightDifference;
+
+            // Always show the scroll button when viewing older messages
+            const scrollButton = document.querySelector('.scroll-to-bottom');
+            if (scrollButton) {
+                scrollButton.classList.add('visible');
+            }
+        } else {
+            // If we're showing the first page (most recent messages), scroll to bottom
+            if (chatMessages) {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
     },
     typing: (data) => {
         // Check if the typing user is the one we're currently chatting with
@@ -205,6 +230,20 @@ function showChat(msg) {
     chatMessages.classList.add('chat-bubbles');
     chatMessages.id = `chat_${msg.chatID}`;
     chatBox.appendChild(chatMessages);
+
+    // Add scroll to bottom button
+    const scrollButton = document.createElement('button');
+    scrollButton.className = 'scroll-to-bottom';
+    scrollButton.innerHTML = '↓';
+    scrollButton.title = 'Scroll to latest messages';
+    scrollButton.addEventListener('click', () => {
+         // Reset pagination
+        currentMessagePage = 1;
+        
+        // Request most recent messages
+        loadMoreMessages(currentChatID, messagesPerPage);
+    });
+    chatBox.appendChild(scrollButton);
     
     // Render initial messages
     renderMessages(msg.privateMessages, chatMessages);
@@ -213,20 +252,54 @@ function showChat(msg) {
 
     // Infinite scroll up (throttled)
     let isThrottled = false;
+
     chatMessages.addEventListener('scroll', () => {
         if (isThrottled) return;
         isThrottled = true;
-        setTimeout(async () => {
-            if (chatMessages.scrollTop <= 10) {
-                // Save current scroll height
-                const oldHeight = chatMessages.scrollHeight;
-                // You can implement "load more" here if desired
-                // For now, just keep as a placeholder
-                // chatMessages.scrollTop = chatMessages.scrollHeight - oldHeight;
+        setTimeout(() => {
+            // Always show the button when viewing older messages
+            if (currentMessagePage > 1) {
+                scrollButton.classList.add('visible');
+            } else {
+                // Only hide when at the bottom of the first page
+                const scrollPosition = chatMessages.scrollHeight - chatMessages.scrollTop - chatMessages.clientHeight;
+                if (scrollPosition > 150) {
+                    scrollButton.classList.add('visible');
+                } else {
+                    scrollButton.classList.remove('visible');
+                }
             }
+            
+            // Load more messages when scrolling to top
+            if (chatMessages.scrollTop <= 10) {
+                const oldHeight = chatMessages.scrollHeight;
+                const oldScrollPosition = chatMessages.scrollTop;
+                
+                currentMessagePage++;
+                loadMoreMessages(currentChatID, currentMessagePage * messagesPerPage);
+            }
+            
             isThrottled = false;
-        }, 1000);
+        }, 200); //execute at most once every 200 milliseconds (5 times per second)
+        // , which is considered a good balance between responsiveness and performance.
     });
+}
+
+function loadMoreMessages(chatId, numberOfMessages) {
+    if (!chatId) return;
+
+    console.log(`Requesting more messages for chat ${chatId}, count: ${numberOfMessages}`);
+    
+    socket.send(JSON.stringify({
+        msgType: "getMessages",
+        privateMessage: {
+            message: {
+                chat_id: chatId
+            }
+        },
+        numberOfReplies: numberOfMessages
+        
+    }));
 }
 
 function renderMessages(messages, container, options = {}) {
@@ -286,6 +359,8 @@ async function openChatWithUser(user) {
         user_id: user.user_id,
         nickname: user.nickname
     };
+     // Reset pagination when opening a new chat
+    currentMessagePage = 1;
     try {
         socket.send(JSON.stringify({
             msgType: "getOrCreateChat",
