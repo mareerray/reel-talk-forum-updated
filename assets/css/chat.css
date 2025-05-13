@@ -108,20 +108,18 @@
 /* Base bubble style */
 .message-bubble {
     position: relative;
-    flex: 1;
-    margin: 2px 0;
-    padding: 8px 12px;
-    border-radius: 8px;
     background: #d1e7dd;
-    max-width: 90vw;
-    align-self: flex-start; /* Default: left side */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-    word-break: break-word;
+    max-width: 100%;
+    width: auto;
+    height: auto; 
+    padding: 8px 12px;
+    word-wrap: break-word;
     overflow-wrap: break-word;
-    overflow: visible;
-    /* overflow-y: auto; */
+    border-radius: 8px; 
+    align-self: flex-start; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
     box-sizing: border-box;
-}
+  }
 
 
 /* Your own messages */
@@ -138,6 +136,9 @@
 }
 .message-content {
     margin-bottom: 2px;
+    max-width: 100%;
+    word-break: break-word;
+    line-height: 1;
 }
 .message-timestamp {
     font-size: 0.8em;
@@ -272,9 +273,12 @@
     }
 
     .message-bubbles {
-        flex: 1;
-        height: calc(100% - 60px);
-        overflow-y: auto;
+        display: inline-block;
+        height: auto;
+        width: auto;
+        max-width: 80%;
+        /* height: calc(100% - 60px); */
+        /* overflow-y: auto; */
         padding: 10px 0;
     }
 
@@ -286,9 +290,22 @@
 
 @media (max-width: 600px) {
     .message-bubble {
-        max-width: 95vw;
+        max-width: 80%;
         font-size: 0.95rem;
+        padding: 6px 10px;
     }
+    .user-list-container {
+        width: 100%;
+        min-width: 0;
+        max-width: 100vw;
+        border-right: none;
+        border-bottom: 1px solid #ddd;
+        min-height: 60px;
+        max-height: 200px;
+        order: 1;
+        flex-shrink: 0; 
+        overflow-y: scroll;
+    }  
 }
 
 .scroll-to-bottom {
