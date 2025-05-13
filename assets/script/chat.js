@@ -80,8 +80,11 @@ const messageHandlers = {
     },
     sendMessage: (data) => {
         console.log("Received sendMessage:", data)
-        // console.log("Raw sendMessage data:", JSON.stringify(data, null, 2));
         const chatId = data.privateMessage?.message?.chat_id;
+        // Always refresh the user list when receiving any message
+        // This ensures notifications appear even from new users
+        requestUserListViaWebSocket();
+        
         if (chatId === currentChatID) {
             addMessageToChat({
                 message: data.privateMessage.message, 
@@ -91,10 +94,10 @@ const messageHandlers = {
                 const chatMessages = document.querySelector('.chat-bubbles');
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }, 50);
-        } else if (data.sendNotification) {
-            // If this message is not for the current chat and has notification flag,
-            // refresh user list to show notification emoji
-            requestUserListViaWebSocket();
+        // } else if (data.sendNotification) {
+        //     // If this message is not for the current chat and has notification flag,
+        //     // refresh user list to show notification emoji
+        //     requestUserListViaWebSocket();
         }
     },
 
@@ -387,7 +390,6 @@ function sendMessage() {
     const sessionToken = localStorage.getItem('sessionToken');
     if (!sessionToken) {
         console.error("No session token");
-        // Optionally, call logout() or redirect
         return;
     }
     // Construct the WebSocket message as expected by the backend
@@ -401,7 +403,7 @@ function sendMessage() {
                 sender_nickname: currentChatUser.nickname
             }
         },
-        token: sessionToken // (optional, can be omitted if not used by backend)
+        token: sessionToken 
     };
     try {
         if (socket.readyState === WebSocket.OPEN) {
