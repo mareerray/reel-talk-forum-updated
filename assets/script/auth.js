@@ -341,7 +341,7 @@ function updateNavMenu() {
     if (localStorage.getItem("sessionToken")) {
         const userNickname = localStorage.getItem("userNickname") || "User";
         navMenu.innerHTML = `
-            <li><span class="user-display">User: ${userNickname}</span></li>
+            <li><span class="user-display">User : ${userNickname}</span></li>
             <li><a href="#" id="logout-button">[Logout]</a></li>
         `;
 

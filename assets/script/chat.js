@@ -109,16 +109,6 @@ const messageHandlers = {
         
          // Use the existing loadMoreMessages function
         loadMoreMessages(currentChatID, 10);
-
-        // socket.send(JSON.stringify({
-        //     msgType: "getMessages",
-        //     privateMessage: {
-        //         message: {
-        //             chat_id: currentChatID 
-        //         }
-        //     },
-        //     numberOfReplies: 10
-        // }));
     },
     messages: (data) => {
         const chatMessages = document.querySelector('.chat-bubbles');
@@ -380,7 +370,7 @@ async function openChatWithUser(user) {
         setTimeout(() => {
             console.log("Refreshing user list after opening chat");
             requestUserListViaWebSocket();
-        }, 300);
+        }, 100);
         // The rest is handled by the chatCreated/messages handlers
     } catch (error) {
         console.error('Chat error:', error);
