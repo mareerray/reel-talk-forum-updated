@@ -385,6 +385,12 @@ body.main-view .bg-container {
 
 /* --------------------------------------------------------------------------------*/
 
+.user-display {
+    color: #fff; /* Adjust color to match your theme */
+    margin-right: 30px;
+    font-size: 1.1rem;
+}
+
 .profile-tab-container {
     width: 100%;
     max-width: 1000px; /* or 900px, to match your other sections */

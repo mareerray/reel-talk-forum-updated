@@ -158,7 +158,6 @@ signUpForm.addEventListener('submit', function(e) {
         })
         .then(data => {
             if (data.success) {
-                showSuccessMessage('Registration successful! You can now log in.');
                 // Switch to login view
                 signInButton.click();
                 signUpForm.reset();
@@ -236,10 +235,12 @@ logInForm.addEventListener('submit', function(e) {
     .then(data => {
         if (data.success) {
             // Store the session token in localStorage
-            localStorage.setItem('sessionToken', data.token); 
+            console.log('Login response data:', data);
+            localStorage.setItem('sessionToken', data.token);
+            localStorage.setItem("userNickname", data.nicknam || data.email); 
     
             // Update the navigation menu
-            updateNavMenu(); // Add this line
+            updateNavMenu(); 
     
             // Redirect to homepage
             redirectToHomepage();      
@@ -267,7 +268,8 @@ function redirectToHomepage() {
     document.getElementById('authView').style.display = 'none';
     // Show the main view
     document.getElementById('mainView').style.display = 'block';
-
+    // Remove auth-view class from body
+    document.body.classList.remove('auth-view');
     // Fetch user profile data
     fetchUserProfile();
     // Load other necessary data for the main view
@@ -285,6 +287,8 @@ function fetchUserProfile() {
         return response.json();
     })
     .then(data => {
+        localStorage.setItem("userNickname", data.nickname);
+        updateNavMenu();
         // Update the profile information in the UI
         document.getElementById('profile-nickname').textContent = 'Nickname: ' + data.nickname;
         document.getElementById('profile-firstname').textContent = 'First Name: ' + data.first_name;
@@ -302,7 +306,84 @@ function fetchUserProfile() {
         localStorage.removeItem("sessionToken");
         document.getElementById("authView").style.display = "block";
         document.getElementById("mainView").style.display = "none";
+        document.body.classList.add('auth-view');
     });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    updateNavMenu(); // Populate navigation menu based on user state
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    const sessionToken = localStorage.getItem("sessionToken");
+
+    if (sessionToken) {
+        document.getElementById("authView").style.display = "none";
+        document.getElementById("mainView").style.display = "block";
+        document.body.classList.remove('auth-view');
+        fetchUserProfile();
+        // loadCategories();
+        // loadPosts();
+        if (typeof initializeApp === "function") initializeApp();
+    } else {
+        document.getElementById("authView").style.display = "block";
+        document.getElementById("mainView").style.display = "none";
+        document.body.classList.add('auth-view');
+    }
+
+    updateNavMenu(); // This ensures nav menu updates on page reload
+});
+
+
+function updateNavMenu() {
+    const navMenu = document.getElementById("nav-menu");
+
+    if (localStorage.getItem("sessionToken")) {
+        const userNickname = localStorage.getItem("userNickname") || "User";
+        navMenu.innerHTML = `
+            <li><span class="user-display">User: ${userNickname}</span></li>
+            <li><a href="#" id="logout-button">[Logout]</a></li>
+        `;
+
+        const logoutBtn = document.getElementById("logout-button");
+        logoutBtn.addEventListener("click", handleLogout);
+    } else {
+        navMenu.innerHTML = `
+            <li><a href="#" id="login-link">[Login]</a></li>
+            <li><a href="#" id="signup-link">[Sign Up]</a></li>
+        `;
+
+        const loginLink = document.getElementById("login-link");
+        const signupLink = document.getElementById("signup-link");
+        const container = document.getElementById('container');
+
+        if (loginLink) {
+            loginLink.addEventListener("click", function(event) {
+                event.preventDefault();
+                container.classList.remove("right-panel-active");
+            });
+        }
+        if (signupLink) {
+            signupLink.addEventListener("click", function(event) {
+                event.preventDefault();
+                container.classList.add("right-panel-active");
+            });
+        }
+    }
+}
+
+function handleLogout(event) {
+    event.preventDefault();
+
+    // Clear client-side storage
+    localStorage.clear();
+    sessionStorage.clear();
+
+    // Notify server
+    fetch('/api/logout', { method: 'POST', credentials: 'include' })
+        .finally(() => {
+            window.location.reload(); // <-- This ensures a full reset
+        });
 }
 
 // Helper functions for displaying errors and success messages
@@ -358,114 +439,3 @@ function clearErrors() {
     errorMessages.forEach(error => error.remove());
 }
 
-function showSuccessMessage(message) {
-    const successMessage = document.createElement('div');
-    successMessage.className = 'success-message';
-    successMessage.textContent = message;
-    successMessage.style.color = 'green';
-    successMessage.style.fontSize = '0.9rem';
-    successMessage.style.marginTop = '10px';
-    successMessage.style.textAlign = 'center';
-    
-    // Add to the active form
-    if (container.classList.contains('right-panel-active')) {
-        signUpForm.appendChild(successMessage);
-    } else {
-        logInForm.appendChild(successMessage);
-    }
-    
-    // Remove after 3 seconds
-    setTimeout(() => {
-        successMessage.remove();
-    }, 3000);
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-    updateNavMenu(); // Populate navigation menu based on user state
-});
-
-// Uncomment this in auth.js
-document.addEventListener("DOMContentLoaded", () => {
-    const sessionToken = localStorage.getItem("sessionToken");
-
-    if (sessionToken) {
-        document.getElementById("authView").style.display = "none";
-        document.getElementById("mainView").style.display = "block";
-        fetchUserProfile();
-        // loadCategories();
-        // loadPosts();
-        if (typeof initializeApp === "function") initializeApp();
-    } else {
-        document.getElementById("authView").style.display = "block";
-        document.getElementById("mainView").style.display = "none";
-    }
-
-    updateNavMenu(); // This ensures nav menu updates on page reload
-});
-
-
-function updateNavMenu() {
-    const navMenu = document.getElementById("nav-menu");
-
-    if (localStorage.getItem("sessionToken")) {
-        navMenu.innerHTML = `
-            <li><a href="#" id="logout-button">[Logout]</a></li>
-        `;
-
-        const logoutBtn = document.getElementById("logout-button");
-        logoutBtn.addEventListener("click", handleLogout);
-    } else {
-        navMenu.innerHTML = `
-            <li><a href="#" id="login-link">[Login]</a></li>
-            <li><a href="#" id="signup-link">[Sign Up]</a></li>
-        `;
-
-        const loginLink = document.getElementById("login-link");
-        const signupLink = document.getElementById("signup-link");
-        const container = document.getElementById('container');
-
-        if (loginLink) {
-            loginLink.addEventListener("click", function(event) {
-                event.preventDefault();
-                container.classList.remove("right-panel-active");
-            });
-        }
-        if (signupLink) {
-            signupLink.addEventListener("click", function(event) {
-                event.preventDefault();
-                container.classList.add("right-panel-active");
-            });
-        }
-    }
-}
-
-/* function handleLogout(event) {
-    event.preventDefault();
-
-    // Clear client-side storage
-    localStorage.clear();
-    sessionStorage.clear();
-
-    // Notify server
-    fetch('/api/logout', { method: 'POST', credentials: 'include' })
-        .then(() => {
-            document.getElementById("authView").style.display = "block";
-            document.getElementById("mainView").style.display = "none";
-            updateNavMenu(); // Refresh navigation
-        })
-        .catch(error => console.error('Logout error:', error));
-} */
-
-        function handleLogout(event) {
-    event.preventDefault();
-
-    // Clear client-side storage
-    localStorage.clear();
-    sessionStorage.clear();
-
-    // Notify server
-    fetch('/api/logout', { method: 'POST', credentials: 'include' })
-        .finally(() => {
-            window.location.reload(); // <-- This ensures a full reset
-        });
-}

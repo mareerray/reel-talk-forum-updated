@@ -132,13 +132,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// // Generate session ID and session token using utils.GenerateUuid()
-	// sessionID, err := utils.GenerateUuid()
-	// if err != nil {
-	// 	log.Printf("Failed to generate session ID: %v", err)
-	// 	respondWithError(w, "Error creating session", "login-general", http.StatusInternalServerError)
-	// 	return
-	// }
 	sessionToken, err := utils.GenerateUuid()
 	if err != nil {
 		log.Printf("Failed to generate session token: %v", err)

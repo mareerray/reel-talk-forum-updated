@@ -17,7 +17,7 @@ body {
 }
 
 body.auth-view .bg-container {
-    display: none;
+    display: none !important;
 }
 
 h1 {
