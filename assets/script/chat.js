@@ -91,6 +91,10 @@ const messageHandlers = {
                 const chatMessages = document.querySelector('.chat-bubbles');
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }, 50);
+        } else if (data.sendNotification) {
+            // If this message is not for the current chat and has notification flag,
+            // refresh user list to show notification emoji
+            requestUserListViaWebSocket();
         }
     },
 
@@ -189,7 +193,10 @@ function renderUserLists(chattedUsers, unchattedUsers) {
         chattedUsers.forEach(user => {
             const li = document.createElement('li');
             li.className = 'user-item';
-            li.textContent = user.nickname + (user.isOnline ? ' 🟢' : ' ⚪');
+            const statusEmoji = user.isOnline ? ' 🟢' : ' ⚪';
+            const notificationEmoji = user.hasUnread ? '🍿' : '';
+
+            li.textContent =  statusEmoji + ' ' + user.nickname + ' ' + notificationEmoji;
             li.addEventListener('click', () => openChatWithUser(user));
             userList.appendChild(li);
         });
@@ -207,7 +214,10 @@ function renderUserLists(chattedUsers, unchattedUsers) {
         unchattedUsers.forEach(user => {
             const li = document.createElement('li');
             li.className = 'user-item';
-            li.textContent = user.nickname + (user.isOnline ? ' 🟢' : ' ⚪');
+            const statusEmoji = user.isOnline ? ' 🟢' : ' ⚪';
+            const notificationEmoji = user.hasUnread ? '🍿' : '';
+            
+            li.textContent = statusEmoji + ' ' + user.nickname + ' ' + notificationEmoji;
             li.addEventListener('click', () => openChatWithUser(user));
             userList.appendChild(li);
         });
@@ -364,8 +374,13 @@ async function openChatWithUser(user) {
     try {
         socket.send(JSON.stringify({
             msgType: "getOrCreateChat",
-            receiver_user_id: user.user_id
+            receiver_user_id: user.user_id,
+            clearUnread: true
         }));
+        setTimeout(() => {
+            console.log("Refreshing user list after opening chat");
+            requestUserListViaWebSocket();
+        }, 300);
         // The rest is handled by the chatCreated/messages handlers
     } catch (error) {
         console.error('Chat error:', error);

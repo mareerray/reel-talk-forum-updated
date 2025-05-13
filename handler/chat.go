@@ -149,7 +149,17 @@ func ReadAllUsers(userID int) ([]model.ChatUser, []model.ChatUser, error) {
 		u.first_name,
 		u.last_name,
 		c.id AS chat_id,
-		COALESCE(c.updated_at, c.created_at) AS last_activity
+		COALESCE(c.updated_at, c.created_at) AS last_activity,
+		(SELECT EXISTS(
+            SELECT 1 FROM messages m
+            WHERE m.chat_id = c.id
+            AND m.user_id_from = u.id
+            AND m.user_id_from != ?
+            AND m.id > IFNULL(
+                (SELECT MAX(m2.id) FROM messages m2
+                WHERE m2.chat_id = c.id
+                AND m2.user_id_from = ?), 0)
+        )) AS has_unread
 	FROM users u
 	LEFT JOIN chats c 
 		ON (u.id = c.user_id_1 OR u.id = c.user_id_2)
@@ -157,7 +167,7 @@ func ReadAllUsers(userID int) ([]model.ChatUser, []model.ChatUser, error) {
 		OR (c.user_id_2 = ? AND c.user_id_1 = u.id)
 	WHERE u.id != ?
 	ORDER BY last_activity DESC;
-    `, userID, userID, userID)
+    `, userID, userID, userID, userID, userID)
 
 	if selectError != nil {
 		fmt.Println("Select error in ReadAllUsers:", selectError)
@@ -172,7 +182,8 @@ func ReadAllUsers(userID int) ([]model.ChatUser, []model.ChatUser, error) {
 	for rows.Next() {
 		var chatID sql.NullInt64
 		var chatUser model.ChatUser
-		// err := rows.Scan(&chatUser.Username, &chatUser.UserUUID, &chatUser.User.Age, &chatUser.User.Gender, &chatUser.User.FirstName, &chatUser.User.LastName, &chatID, &chatUser.ChatUUID, &chatUser.LastActivity)
+		var hasUnread bool
+
 		err := rows.Scan(
 			&chatUser.Username,
 			&chatUser.UserID,
@@ -182,6 +193,7 @@ func ReadAllUsers(userID int) ([]model.ChatUser, []model.ChatUser, error) {
 			&chatUser.LastName,
 			&chatID,
 			&chatUser.LastActivity,
+			&hasUnread,
 		)
 		if err != nil {
 			return nil, nil, err
@@ -198,7 +210,14 @@ func ReadAllUsers(userID int) ([]model.ChatUser, []model.ChatUser, error) {
 	if err := rows.Err(); err != nil {
 		return nil, nil, err
 	}
-
+	  // For each user, set the HasUnread flag based on database query
+	for i := range chattedUsers {
+        // Check if there are unread messages from this user
+        hasUnread, err := CheckUnreadMessages(userID, chattedUsers[i].UserID)
+        if err == nil {
+            chattedUsers[i].HasUnread = hasUnread
+        }
+    }
 	// Sort non-chatted users alphabetically
 	sort.Slice(notChattedUsers, func(i, j int) bool {
 		return strings.ToLower(notChattedUsers[i].Username) < strings.ToLower(notChattedUsers[j].Username)
@@ -206,6 +225,69 @@ func ReadAllUsers(userID int) ([]model.ChatUser, []model.ChatUser, error) {
 
 	return chattedUsers, notChattedUsers, nil
 
+}
+
+func CheckUnreadMessages(userID int, senderID int) (bool, error) {
+    chatID, err := FindChatIDbyUserIDS(userID, senderID)
+    if err != nil {
+        return false, err
+    }
+    
+    if chatID == 0 {
+        return false, nil
+    }
+    
+    var hasUnread bool
+    query := `
+    SELECT EXISTS(
+        SELECT 1 FROM messages m
+        WHERE m.chat_id = ?
+        AND m.user_id_from = ?
+        AND m.created_at > IFNULL(
+            (SELECT read_at FROM message_read_receipts 
+				WHERE chat_id = ? AND user_id = ?), 
+            '1970-01-01')
+    ) AS has_unread
+    `
+    
+    err = DB.QueryRow(query, chatID, senderID, chatID, userID).Scan(&hasUnread)
+    if err != nil {
+        log.Printf("Error checking unread messages: %v", err)
+        return false, err
+    }
+    
+    return hasUnread, nil
+}
+
+func ClearUnreadMessages(userID int, senderID int) error {
+    chatID, err := FindChatIDbyUserIDS(userID, senderID)
+    if err != nil {
+        log.Printf("Error finding chat: %v", err)
+        return err
+    }
+    
+    if chatID == 0 {
+        log.Printf("No chat found between users %d and %d", userID, senderID)
+        return nil
+    }
+    
+    log.Printf("Clearing unread messages in chat %d for user %d from sender %d", 
+				chatID, userID, senderID)
+    
+    // SQLite syntax for UPSERT
+    _, err = DB.Exec(`
+        INSERT INTO message_read_receipts (chat_id, user_id, read_at)
+        VALUES (?, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(chat_id, user_id) 
+        DO UPDATE SET read_at = CURRENT_TIMESTAMP
+    `, chatID, userID)
+    
+    if err != nil {
+        log.Printf("Error updating read receipt: %v", err)
+        return err
+    }
+    
+    return nil
 }
 
 // ReadAllMessages retrieves the last N messages from a chat

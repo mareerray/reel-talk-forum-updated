@@ -105,6 +105,7 @@ func handleSendMessage(conn *websocket.Conn, msg model.WSMessage, user model.Use
     // Create receiver message (isCreatedBy = false)
     receiverMsg := msg
     receiverMsg.PrivateMessage.IsCreatedBy = false
+	receiverMsg.SendNotification = true
 
 	// Send to receiver
 	receiverKey := strconv.Itoa(msg.ReceiverUserID)
@@ -143,6 +144,13 @@ func handleGetOrCreateChat(conn *websocket.Conn, msg model.WSMessage, user model
         }
     }
 
+	if msg.ClearUnread {
+        err := ClearUnreadMessages(user.ID, receiverID)
+        if err != nil {
+            log.Printf("Error clearing unread messages: %v", err)
+        }
+    }
+
 	response := model.WSMessage{
 		MsgType: "chatCreated",
 		UserID:  user.ID,
@@ -166,9 +174,6 @@ func handleGetMessages(conn *websocket.Conn, msg model.WSMessage, user model.Use
     }
 
     numberOfMessages := 10 // Default
-    // if msg.NumberOfReplies > 0 { // Use field from WSMessage
-    //     numberOfMessages = msg.NumberOfReplies
-    // }
 
 	// Calculate offset based on number of messages requested
     // For first page (10 messages), offset = 0

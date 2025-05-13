@@ -93,8 +93,9 @@ type WSMessage struct {
 	ReceiverUserName        string           `json:"receiver_nickname"`
 	TypingNickname 			string 			 `json:"typing_nickname"`
 	Messages                []PrivateMessage `json:"messages"`
-	SendNotification        bool             `json:"notification"`
+	SendNotification        bool             `json:"sendNotification"`
 	GotAllMessagesRequested bool             `json:"allMessagesGot"`
+	ClearUnread 			bool             `json:"clearUnread"`
 }
 
 type Chat struct {
@@ -129,6 +130,7 @@ type ChatUser struct {
 	LastActivity sql.NullString `json:"lastActivity"` // Changed to NullString
 	ChatID       sql.NullInt64  `json:"chat_id"`
 	IsOnline     bool           `json:"isOnline"`
+	HasUnread 	 bool           `json:"hasUnread"`
 }
 
 type PrivateMessage struct {
