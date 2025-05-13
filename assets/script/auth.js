@@ -375,6 +375,10 @@ function updateNavMenu() {
 function handleLogout(event) {
     event.preventDefault();
 
+    if (typeof socket !== 'undefined' && socket) {
+        socket.close();
+    }
+
     // Clear client-side storage
     localStorage.clear();
     sessionStorage.clear();
