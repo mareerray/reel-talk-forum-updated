@@ -42,7 +42,6 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
 	user, expiry, err := utils.SelectSession(sessionToken)
 	if err != nil || time.Now().After(expiry) {
 		http.Error(w, "Unauthorized or expired token", http.StatusUnauthorized)
-		 w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 	log.Println("Session valid, proceeding to upgrade...")

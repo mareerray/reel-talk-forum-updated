@@ -235,7 +235,6 @@ logInForm.addEventListener('submit', function(e) {
     .then(data => {
         if (data.success) {
             // Store the session token in localStorage
-            console.log('Login response data:', data);
             localStorage.setItem('sessionToken', data.token);
             localStorage.setItem("userNickname", data.nicknam || data.email); 
     

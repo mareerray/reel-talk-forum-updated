@@ -5,6 +5,8 @@ document.getElementById('messageInput').addEventListener('keydown', (event) => {
     }
 });
 
+let currentChatID;
+let currentChatUser;
 let typingTimeout;
 let isTypingIndicatorVisible = false;
 let currentMessagePage = 1;
@@ -31,7 +33,7 @@ messageInput.addEventListener('input', () => {
             receiver_user_id: currentChatUser.user_id,
         };
         socket.send(JSON.stringify(stopPayload));
-    }, 3000);
+    }, 2000);
     // 5 seconds is the widely recommended default for chat apps, and will feel smoother for
 });
 
@@ -55,7 +57,6 @@ function initializeApp() {
     socket.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data);
-            console.log("WS Message:", data.msgType, data);
 
             if (messageHandlers[data.msgType]) {
                 messageHandlers[data.msgType](data);
@@ -71,7 +72,6 @@ function initializeApp() {
 // Message Handlers - Received
 const messageHandlers = {
     listOfChat: (data) => {
-        console.log("Received user list:", data);
         renderUserLists(data.chattedUsers, data.unchattedUsers);
     },
     updateClients: (data) => {
@@ -79,7 +79,6 @@ const messageHandlers = {
         requestUserListViaWebSocket();
     },
     sendMessage: (data) => {
-        console.log("Received sendMessage:", data)
         const chatId = data.privateMessage?.message?.chat_id;
         // Always refresh the user list when receiving any message
         // This ensures notifications appear even from new users
@@ -161,7 +160,6 @@ const messageHandlers = {
 
 function requestUserListViaWebSocket() {
     if (socket && socket.readyState === WebSocket.OPEN) {
-        console.log("Requesting user list via WebSocket");
         socket.send(JSON.stringify({
             msgType: "getUsers"
         }));
@@ -289,10 +287,7 @@ function showChat(msg) {
 }
 
 function loadMoreMessages(chatId, numberOfMessages) {
-    if (!chatId) return;
-
-    console.log(`Requesting more messages for chat ${chatId}, count: ${numberOfMessages}`);
-    
+    if (!chatId) return;    
     socket.send(JSON.stringify({
         msgType: "getMessages",
         privateMessage: {
