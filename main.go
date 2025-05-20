@@ -16,10 +16,7 @@ func main() {
 	var err error
 
 	utils.DB = utils.OpenDBConnection()
-	// utils.DB, err = sql.Open("sqlite3", "reel-talk.db")
-	// if err != nil {
-	// 	log.Fatal("Failed to open database:", err)
-	// }
+
 	defer utils.DB.Close()
 
 	// Optionally, test the connection
