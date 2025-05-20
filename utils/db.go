@@ -31,8 +31,6 @@ func OpenDBConnection() *sql.DB {
 }
 
 func ExecuteSQLFile(sqlFilePath string) error {
-	db := OpenDBConnection()
-	defer db.Close()
 
 	sqlBytes, err := os.ReadFile(sqlFilePath)
 	if err != nil {
@@ -46,7 +44,7 @@ func ExecuteSQLFile(sqlFilePath string) error {
 		if trimmedStmt == "" {
 			continue
 		}
-		_, err := db.Exec(trimmedStmt)
+		_, err := DB.Exec(trimmedStmt)
 		if err != nil {
 			return fmt.Errorf("error executing statement: %v", err)
 		}

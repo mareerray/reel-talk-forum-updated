@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"log"
 	"net/http"
 	"real-time-forum/handler"
@@ -15,10 +14,12 @@ func main() {
 
 	// Initialize database
 	var err error
-	utils.DB, err = sql.Open("sqlite3", "reel-talk.db")
-	if err != nil {
-		log.Fatal("Failed to open database:", err)
-	}
+
+	utils.DB = utils.OpenDBConnection()
+	// utils.DB, err = sql.Open("sqlite3", "reel-talk.db")
+	// if err != nil {
+	// 	log.Fatal("Failed to open database:", err)
+	// }
 	defer utils.DB.Close()
 
 	// Optionally, test the connection
@@ -47,7 +48,6 @@ func main() {
 	http.HandleFunc("/api/validate-session", handler.ValidateSessionHandler)
 
 	http.HandleFunc("/ws", handler.HandleConnections)
-
 
 	// Parse the HTML template
 	indexTemplate, err := template.ParseFiles("index.html")
