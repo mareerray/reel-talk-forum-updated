@@ -1,4 +1,4 @@
-# RealTalk Forum 🍿
+# ReelTalk Forum 🍿
 
 **A modern, real-time forum with private messaging powered by WebSockets**  
 *Last Updated: May 21, 2025*
