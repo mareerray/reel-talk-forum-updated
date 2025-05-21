@@ -96,6 +96,8 @@ type WSMessage struct {
 	SendNotification        bool             `json:"sendNotification"`
 	GotAllMessagesRequested bool             `json:"allMessagesGot"`
 	ClearUnread 			bool             `json:"clearUnread"`
+	Page 					int				 `json:"page"`
+	HasMore					bool			 `json:"hasMore"`
 }
 
 type Chat struct {

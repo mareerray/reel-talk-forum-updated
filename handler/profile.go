@@ -231,7 +231,6 @@ func UpdateOnlineTime(UserID int) error {
 func FindUserByUUID(UUID string) (int, error) {
 	var id int
 	err := DB.QueryRow("SELECT id FROM users WHERE uuid = ?", UUID).Scan(&id)
-	log.Printf("[DEBUG] UUID %s → ID %d (error: %v)", UUID, id, err)
 	return id, err
   }
   

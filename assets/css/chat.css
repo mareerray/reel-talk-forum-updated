@@ -114,7 +114,7 @@
     position: relative;
     background: #d1e7dd;
     max-width: 100%;
-    width: auto;
+    max-width: 70%;
     height: auto; 
     padding: 8px 12px;
     word-wrap: break-word;
@@ -199,7 +199,7 @@
     border-radius: 4px;
     padding-left: 13px;
     margin: 8px 20px -38px 20px;
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     font-weight: bold;
     flex-shrink: 0; /* Prevent the typing indicator from shrinking */
     align-self: flex-start;
@@ -316,32 +316,6 @@
         flex-shrink: 0; 
         overflow-y: scroll;
     }  
-}
-
-.scroll-to-bottom {
-    position: absolute;
-    bottom: 200px; /* Position above the message input */
-    right: 18px;
-    background-color: rgb(131, 30, 30); /* Matches your send button color */
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.3s, transform 0.3s;
-    z-index: 10;
-}
-
-.scroll-to-bottom.visible {
-    opacity: 1;
-    transform: translateY(0);
 }
 
 

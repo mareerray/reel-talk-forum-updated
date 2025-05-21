@@ -33,12 +33,10 @@ func main() {
 	http.HandleFunc("/api/categories", handler.GetCategoriesHandler)
 	http.HandleFunc("/api/posts/list", handler.GetPostsHandler)
 	http.HandleFunc("/api/user/profile", handler.GetUserProfile)
-	// Add these to your API routes
 	http.HandleFunc("/api/comments", handler.PostCommentHandler)  // POST new comment
 	http.HandleFunc("/api/comments/", handler.GetCommentsHandler) // GET comments for post
 	http.HandleFunc("/api/posts", handler.CreatePostHandler)      // POST to create a new post
 
-	// New API routes for user authentication
 	http.HandleFunc("/api/register", handler.RegisterHandler)
 	http.HandleFunc("/api/login", handler.LoginHandler)
 	http.HandleFunc("/api/logout", handler.LogoutHandler)

@@ -38,7 +38,6 @@ const formattedDateTime = (() => {
 })();
 
 function displayPosts(posts, postContainer) {
-    // console.log("Displaying posts in container:", postContainer);
     // Clear existing content
     postContainer.innerHTML = '';
     
@@ -81,8 +80,6 @@ function displayPosts(posts, postContainer) {
 }
 
 function showSinglePost(postId, post) {
-    console.log("Showing single post:", post);
-
     // Get the post feed tab
     const postFeedButton = document.getElementById('post-feed-button');
 
@@ -170,9 +167,6 @@ function showSinglePost(postId, post) {
             post_id: postId,
             content: commentText
         };
-        console.log("Sending comment request:", requestBody);
-
-        console.log("With token:", token);
         
         fetch('/api/comments', {
             method: 'POST',

@@ -170,8 +170,6 @@ func ValidateSession(w http.ResponseWriter, r *http.Request) (bool, model.User, 
 }
 
 func SelectSession(sessionToken string) (model.User, time.Time, error) {
-	// db := OpenDBConnection()
-	// defer db.Close()
 
 	log.Printf("Validating session token: %s", sessionToken)
 
@@ -203,9 +201,6 @@ func DeleteSession(sessionToken string) error {
 	defer db.Close() // Close the connection after the function finishes
 	_, err := db.Exec(`DELETE FROM sessions WHERE session_token = ?`, sessionToken)
 
-	// _, err := db.Exec(`UPDATE sessions
-	// 				SET session_expiry = CURRENT_TIMESTAMP
-	// 				WHERE session_token = ?;`, sessionToken)
 	if err != nil {
 		// Handle other database errors
 		log.Fatal(err)

@@ -1,70 +1,92 @@
-*REAL-TIME-FORUM*
+# RealTalk Forum 🍿
 
-<h2>Objectives</h2>
-<h4>On this project you will have tofocus on a few points:</h4>
-<li>Registration and Login</li>
-<li>Creation of posts</li>
-    <ul>
-    <li>Commenting posts</li>
-    </ul>
-<li>Private Messages</li>
-<br>
-<h2>Registration and Login</h2>
+**A modern, real-time forum with private messaging powered by WebSockets**  
+*Last Updated: May 21, 2025*
 
-<h4>To be able to use the new and upgraded forum users will have to register and login. This is premium stuff. The registration and login process should take in consideration the following features:</h4>
-<br>
-<li>Users must be able to fill a register form to register into the forum. They will have to provide at least:</li>
-    <ul>
-        <li>Nickname</li>
-        <li>Age</li>
-        <li>Gender</li>
-        <li>First Name</li>
-        <li>Last Name</li>
-        <li>E-mail</li>
-        <li>Password</li>
-    </ul>
-<li>The user must be able to connect using either the nickname or the e-mail combined with the password.</li>
-<li>The user must be able to log out from any page on the forum.</li>
-<br>
-<h2>Posts and Comments</h2>
-<h4>This part is pretty similar to the first forum. Users must be able to:</h4>
-<li>Create posts</li>
-    <ul>
-        <li>Posts will have categories</li>
-    </ul>
-<li>Crate comments on the posts</li>
-<li>See posts in the feed display</li>
-    <ul>
-        <li>See comments only if they click on a post</li>    
-    </ul>
-<br>
-<h2>Private Massages</h2>
-<h4>Users will be able to send private messages to each other, so you will need to create a chat, where it will exist :</h4>
-<li>A section to show who is online/offline and able to talk to:</li>
-    <ul>
-        <li>This section must be organized by the last message sent (just like discord). If the user is new and does not present messages you must organize it in alphabetic order.
-        </li>
-        <li>The user must be able to send private messages to the users who are online. 
-        </li>
-        <li>This section must be visible at all times.
-        </li>
-    </ul>
-<li>A section that when clicked on the user that you want to send a message, reloads the past messages. Chats between users must:</li>
-    <ul>
-    <li>Be visible, for this you will have to be able to see the previous messages that you had with the user</li>
-    <li>Reload the last 10 messages and when scrolled up to see more messages you must provide the user with 10 more, without spamming the scroll event. Do not forget what you learned!! (Throttle, Debounce)</li>
-    </ul>
-<li>Messages must have a specific format:</li>
-    <ul>
-    <li>A date that shows when the message was sent</li>
-    <li>The user name, that identifies the user that sent the message</li>
-    </ul>
-<p>As it is expected, the messages should work in real time, in other words, if a user sends a message, the other user should receive the notification of the new message without refreshing the page. Again this is possible through the usage of WebSockets in backend and frontend.</p>
+---
 
-<h1>Allowed Packages</h1>
-<br>
-<li>All standard go packages are allowed</li>
-<li>Gorilla websocket</li>
-<li>sqlite3</li>
-<li>bcrypt</li>
-<li>UUID</li>
+## 🚀 Features
+
+### 🔐 Registration & Login
+- **Secure Auth**: Register with nickname, email, password, and profile details (age, gender, etc.)
+- **Flexible Login**: Use **nickname** *or* **email** + password
+- Session management with cookies
+- Bcrypt password hashing
+
+### 📝 Posts & Comments
+- Create posts with categories 
+- Comment on posts
+- Feed-style post display
+- Comments visible on click (reduces clutter)
+
+### 💬 Private Messaging
+- **Real-time chat** via WebSockets
+- **Smart notifications**:
+  - 🍿 Unread badge counters on chat list items
+  - ⏲️ "User is typing.🍿.🍿.🍿" animation indicators
+- Online user list sorted by:
+  - Last message time (recent first)
+  - Alphabetical order for new chats
+- Message history with infinite scroll (10 messages per load)
+- Message formatting:
+```
+Admin 
+"Want to watch a movie later?"
+14-05-2025 14:30:00
+```
+
+---
+
+## 🛠 Tech Stack
+
+| Component       | Technology                          |
+|-----------------|-------------------------------------|
+| **Database**    | SQLite                              |
+| **Backend**     | Golang (HTTP server, WebSockets)    |
+| **Frontend**    | Vanilla JavaScript + CSS3, HTML5          |
+| **Auth**        | UUID sessions + bcrypt              |
+
+**Key Packages**:  
+`gorilla/websocket` `sqlite3` `uuid` `bcrypt`
+
+---
+
+## ⚙️ Installation
+
+1. Clone repo
+git clone https://01.gritlab.ax/git/mreunsat/real-time-forum
+
+2. Install dependencies
+```
+go mod init real-time-forum
+go mod tidy
+````
+
+3. Initialize database & start server
+```
+go run .
+```
+4. Start server
+
+Visit `http://localhost:8999` in your browser!
+
+---
+
+## 🧠 Learning Outcomes
+
+This project teaches:
+- **Web Fundamentals**: HTTP, cookies, DOM manipulation
+- **Real-Time Systems**: WebSocket implementation
+- **Concurrency**: Go routines/channels for message brokering
+- **SQL**: Complex queries for message pagination
+- **Performance**: Throttling/debouncing scroll events
+
+---
+
+*Created by Mayuree 🍿 and Fateme 🎞️ * 
+- Mayuree Reunsati : https://github.com/mareerray
+- Fatemeh Kheirkhah : https://github.com/fatemekh78
+
+![Login&register page](assets/images/authView.png)
+
+![Main Forum page](assets/images/mainView.png)

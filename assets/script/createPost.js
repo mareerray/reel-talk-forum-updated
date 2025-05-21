@@ -130,18 +130,14 @@ function createPost(event) {
     const formattedCategories = Array.from(checkedCategories).map(checkbox => 
         `${checkbox.value} ${checkbox.dataset.emoji}`
     ).join(',');
-    
-    console.log("Formatted categories:", formattedCategories);
-    
+        
     // Create request body
     const requestBody = {
         title: title,
         content: content,
         categories: formattedCategories
     };
-    
-    console.log("Sending request:", requestBody);
-    
+        
     // Get auth token
     const token = localStorage.getItem('sessionToken');
     

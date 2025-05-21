@@ -32,9 +32,6 @@ h1 {
 p {
     font-size: 16px;
     font-weight: 100;
-    /* line-height: 20px;
-    letter-spacing: 0.5px;
-    margin: 20px 0 30px; */
     color: #333;
 }
 span {
@@ -61,21 +58,19 @@ a {
     background: #fff;
     display: flex;
     flex-direction: column;
-    /* padding: 0 50px; */
     height: 100%;
     justify-content: center;
     align-items: center;
     text-align: center;
     max-width:600px;
     margin-bottom: 15px;
-    /* margin: 0 auto; */
 }
 
 .form-group {
     display: flex;
-    justify-content: space-between;  /* Space out labels and inputs */
-    margin-bottom: 15px;  /* Space between form rows */
-    align-items: center; /* Vertically align labels and inputs */
+    justify-content: space-between; 
+    margin-bottom: 15px;  
+    align-items: center; 
 }
 
 /* Button Styling */
@@ -127,7 +122,7 @@ a {
 .radio-group input[type="radio"] {
     appearance: none; 
     -webkit-appearance: none; 
-    width:0.00001px; /* Let the radio button size be automatic */
+    width:0.00001px; 
     height:0.00001px;
     border: 2px solid #ccc;
     border-radius: 45%;
@@ -183,7 +178,7 @@ a {
         cursor: pointer;
         user-select: none;
         color: #555;
-        font-size: 18px; /* adjust size as needed */
+        font-size: 18px; 
     }
 }
 
@@ -194,7 +189,7 @@ a {
     opacity: 0;
     z-index: 1;
     transition: opacity 0.5s ease, transform 0.5s ease;
-    background-color: #fff;  /* Optional background for the container */
+    background-color: #fff; 
     padding: 40px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     border-radius: 5px;
@@ -205,7 +200,7 @@ a {
     
     .password-wrapper input {
         width: 100%;
-        padding-right: 4px; /* space for the icon */
+        padding-right: 4px; 
         box-sizing: border-box;
     }
     
@@ -216,7 +211,7 @@ a {
         transform: translateY(-50%);
         cursor: pointer;
         user-select: none;
-        font-size: 18px; /* or 24px, 30px, etc. */
+        font-size: 18px;
         color: #666;
     
     }
@@ -230,9 +225,8 @@ a {
 
 /* Input Group Styles */
 .input-group {
-    /* width: 500px; */
     display: flex;
-    align-items: center;  /* Align label and input vertically in the center */
+    align-items: center;  
     margin-bottom: 15px;  
     width: 100%;
     max-width: 100%;
@@ -245,11 +239,11 @@ a {
     display: block;
     color: #333;
     font-weight: bold;
-    width: 120px; /* Fixed width for labels */
-    text-align: right; /* Align the text of labels to the right */
-    margin-right: 10px; /* Space between label and input */
+    width: 120px; 
+    text-align: right; 
+    margin-right: 10px; 
     margin-top: 10px;
-    font-weight: bold; /* Optionally bold the labels */
+    font-weight: bold; 
 }
 
 .input-group input {
@@ -279,7 +273,6 @@ input {
 }
 
 
-/* Remove extra margins between elements */
 .input-group:last-child {
     margin-bottom: 0;
 }
@@ -326,7 +319,6 @@ input {
 
 .overlay {
     background-color: #e03f22;
-    /* background: linear-gradient(45deg, rgba(224, 63, 34, 1), rgba(224, 63, 34, 0.7)); */
 	background-repeat: no-repeat;
 	background-size: cover;
 	background-position: 0 0;
@@ -410,7 +402,7 @@ display: none;
 
 @media (max-width: 768px) {
     .container {
-        min-height: 600px; /* Taller to accommodate stacked form fields */
+        min-height: 600px; 
     }
     
     .form-container {
@@ -419,7 +411,7 @@ display: none;
     
     .sign-in-container, 
     .sign-up-container {
-        width: 50%; /* Keep the same width for the toggle to work */
+        width: 50%; 
     }
     
     .overlay-container {
@@ -427,7 +419,6 @@ display: none;
         right: 0;
     }
     
-    /* Make form elements stack */
     .input-group {
         flex-direction: column;
         align-items: flex-start;
@@ -451,13 +442,11 @@ display: none;
         width: 95%;
     }
     
-    /* Make the forms take full width */
     .sign-in-container, 
     .sign-up-container {
         width: 100%;
     }
     
-    /* Adjust the overlay */
     .overlay-container {
         width: 100%;
         height: 50%;
@@ -506,16 +495,15 @@ display: none;
 @media (max-width: 480px) {
     button, 
     input[type="submit"] {
-        min-height: 44px; /* Minimum touch target size */
+        min-height: 44px; 
         width: 100%;
     }
     
     input {
-        font-size: 16px; /* Prevent zoom on iOS */
+        font-size: 16px;
         padding: 12px 15px;
     }
     
-    /* Add some spacing between form elements */
     form {
         padding: 0 5%;
     }

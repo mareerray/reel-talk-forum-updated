@@ -10,7 +10,9 @@ let currentChatUser;
 let typingTimeout;
 let isTypingIndicatorVisible = false;
 let currentMessagePage = 1;
+let hasMoreMessages = true;
 const messagesPerPage = 10;
+const displayedMessageIds = new Set();
 
 messageInput.addEventListener('input', () => {
     if (!currentChatUser?.user_id) return;
@@ -69,15 +71,19 @@ function initializeApp() {
     };
 }
 
+// ------------------------------------------------------------------------------ //
+
 // Message Handlers - Received
 const messageHandlers = {
     listOfChat: (data) => {
         renderUserLists(data.chattedUsers, data.unchattedUsers);
     },
+
     updateClients: (data) => {
         console.log("Status update - refreshing list...");
         requestUserListViaWebSocket();
     },
+
     sendMessage: (data) => {
         const chatId = data.privateMessage?.message?.chat_id;
         // Always refresh the user list when receiving any message
@@ -93,10 +99,6 @@ const messageHandlers = {
                 const chatMessages = document.querySelector('.chat-bubbles');
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }, 50);
-        // } else if (data.sendNotification) {
-        //     // If this message is not for the current chat and has notification flag,
-        //     // refresh user list to show notification emoji
-        //     requestUserListViaWebSocket();
         }
     },
 
@@ -108,55 +110,60 @@ const messageHandlers = {
         
         currentChatID = data.privateMessage.message.chat_id;
         console.log("Chat created with ID:", currentChatID);
-        
-         // Use the existing loadMoreMessages function
-        loadMoreMessages(currentChatID, 10);
-    },
-    messages: (data) => {
-        const chatMessages = document.querySelector('.chat-bubbles');
-        const oldHeight = chatMessages ? chatMessages.scrollHeight : 0;
-        const oldScrollPosition = chatMessages ? chatMessages.scrollTop : 0;
         showChat({
-            receiverUserID: currentChatUser.user_id,
-            receiverUserName: currentChatUser.nickname,
+            receiverUserID: currentChatUser?.user_id,
+            receiverUserName: currentChatUser?.nickname,
             chatID: currentChatID,
-            privateMessages: data.messages
+            privateMessages: []
         });
-        // If this was a "load more" request (not the initial load)
-        if (currentMessagePage > 1 && chatMessages) {
-            // Calculate new position to maintain the same relative position
-            const newHeight = chatMessages.scrollHeight;
-            const heightDifference = newHeight - oldHeight;
-            chatMessages.scrollTop = oldScrollPosition + heightDifference;
+        loadMoreMessages(currentChatID, 1);
+    },
 
-            // Always show the scroll button when viewing older messages
-            const scrollButton = document.querySelector('.scroll-to-bottom');
-            if (scrollButton) {
-                scrollButton.classList.add('visible');
-            }
+    messages: (data) => {
+        hasMoreMessages = data.hasMore;
+
+        const chatMessages = document.querySelector('.chat-bubbles');
+        const messagesArr = Array.isArray(data.messages) ? data.messages : [];
+
+        if (data.page === 1) {
+            displayedMessageIds.clear();
+            renderMessages(data.messages, chatMessages);
+            messagesArr.forEach(pm => displayedMessageIds.add(pm.message?.id || pm.id));
+            chatMessages.scrollTop = chatMessages.scrollHeight;
         } else {
-            // If we're showing the first page (most recent messages), scroll to bottom
-            if (chatMessages) {
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            }
+            const oldHeight = chatMessages.scrollHeight;
+            const fragment = document.createDocumentFragment();
+
+            // Filter out duplicates
+            const newMessages = messagesArr.filter(pm => {
+                const id = pm.message?.id || pm.id;
+                return !displayedMessageIds.has(id);
+            });
+
+            newMessages.slice().reverse().forEach(pm => {
+                createChatBubble(pm, fragment, pm.isCreatedBy);
+                displayedMessageIds.add(pm.message?.id || pm.id);
+            });
+            chatMessages.insertBefore(fragment, chatMessages.firstChild);
+            chatMessages.scrollTop = chatMessages.scrollHeight - oldHeight;
         }
     },
+
     typing: (data) => {
         // Check if the typing user is the one we're currently chatting with
         if (data.user_id === currentChatUser?.user_id) {
             showTypingIndicator(data.typing_nickname || "User");
         }
     },
+
     stopped_typing: (data) => {
         if (data.user_id === currentChatUser?.user_id) {
             hideTypingIndicator();
         }
     }
-    
 };
 
-
-// ---------------------------  //
+// ------------------------------------------------------------------------------ //
 
 function requestUserListViaWebSocket() {
     if (socket && socket.readyState === WebSocket.OPEN) {
@@ -214,6 +221,29 @@ function renderUserLists(chattedUsers, unchattedUsers) {
         });
     }
 }
+
+async function openChatWithUser(user) {
+    currentChatUser = {
+        user_id: user.user_id,
+        nickname: user.nickname
+    };
+     // Reset pagination when opening a new chat
+    currentMessagePage = 1;
+    try {
+        socket.send(JSON.stringify({
+            msgType: "getOrCreateChat",
+            receiver_user_id: user.user_id,
+            clearUnread: true
+        }));
+        setTimeout(() => {
+            requestUserListViaWebSocket();
+        }, 100);
+        // The rest is handled by the chatCreated/messages handlers
+    } catch (error) {
+        console.error('Chat error:', error);
+    }
+}
+
 function showChat(msg) {
     const chatBox = document.getElementById('chatBox');
     if (!chatBox) {
@@ -231,20 +261,6 @@ function showChat(msg) {
     chatMessages.classList.add('chat-bubbles');
     chatMessages.id = `chat_${msg.chatID}`;
     chatBox.appendChild(chatMessages);
-
-    // Add scroll to bottom button
-    const scrollButton = document.createElement('button');
-    scrollButton.className = 'scroll-to-bottom';
-    scrollButton.innerHTML = '↓';
-    scrollButton.title = 'Scroll to latest messages';
-    scrollButton.addEventListener('click', () => {
-         // Reset pagination
-        currentMessagePage = 1;
-        
-        // Request most recent messages
-        loadMoreMessages(currentChatID, messagesPerPage);
-    });
-    chatBox.appendChild(scrollButton);
     
     // Render initial messages
     renderMessages(msg.privateMessages, chatMessages);
@@ -256,37 +272,20 @@ function showChat(msg) {
 
     chatMessages.addEventListener('scroll', () => {
         if (isThrottled) return;
+        if (!hasMoreMessages) return; 
         isThrottled = true;
         setTimeout(() => {
-            // Always show the button when viewing older messages
-            if (currentMessagePage > 1) {
-                scrollButton.classList.add('visible');
-            } else {
-                // Only hide when at the bottom of the first page
-                const scrollPosition = chatMessages.scrollHeight - chatMessages.scrollTop - chatMessages.clientHeight;
-                if (scrollPosition > 150) {
-                    scrollButton.classList.add('visible');
-                } else {
-                    scrollButton.classList.remove('visible');
-                }
-            }
-            
-            // Load more messages when scrolling to top
+          // Load more messages when scrolling to top
             if (chatMessages.scrollTop <= 10) {
-                const oldHeight = chatMessages.scrollHeight;
-                const oldScrollPosition = chatMessages.scrollTop;
-                
                 currentMessagePage++;
-                loadMoreMessages(currentChatID, currentMessagePage * messagesPerPage);
+                loadMoreMessages(currentChatID, currentMessagePage);
             }
-            
             isThrottled = false;
-        }, 200); //execute at most once every 200 milliseconds (5 times per second)
-        // , which is considered a good balance between responsiveness and performance.
+        }, 500); //execute at most once every 500 milliseconds (2 times per second)
     });
 }
 
-function loadMoreMessages(chatId, numberOfMessages) {
+function loadMoreMessages(chatId, page) {
     if (!chatId) return;    
     socket.send(JSON.stringify({
         msgType: "getMessages",
@@ -295,7 +294,7 @@ function loadMoreMessages(chatId, numberOfMessages) {
                 chat_id: chatId
             }
         },
-        numberOfReplies: numberOfMessages
+        page: page
         
     }));
 }
@@ -307,7 +306,6 @@ function renderMessages(messages, container, options = {}) {
     });
 }
 function addMessageToChat(pm) {
-    console.log("Adding message to chat:", pm);
     const chatMessages = document.querySelector('.chat-bubbles');
     createChatBubble(pm, chatMessages, pm.isCreatedBy);
 }
@@ -316,6 +314,20 @@ function createChatBubble(pm, chatMessages, isSelf) {
     const msg = pm.message || pm;
     const messageDiv = document.createElement('div');
     messageDiv.className = `message-bubble${isSelf ? ' self' : ''}`;
+
+    if (!chatMessages) {
+        showChat({
+        receiverUserID: currentChatUser?.user_id,
+        receiverUserName: currentChatUser?.nickname,
+        chatID: currentChatID,
+        privateMessages: []
+        });
+        chatMessages = document.querySelector('.chat-bubbles');
+        if (!chatMessages) {
+            console.error('chatMessages container still does not exist!');
+            return;
+        }
+    }
 
     // Nickname (optional - remove if not needed)
     if (msg.sender_nickname || msg.SenderUsername) {
@@ -331,7 +343,7 @@ function createChatBubble(pm, chatMessages, isSelf) {
     contentDiv.textContent = msg.content;
     messageDiv.appendChild(contentDiv);
 
-    // Timestamp (improved formatting)
+    // Timestamp 
     const timestampDiv = document.createElement('div');
     timestampDiv.className = 'message-timestamp';
     
@@ -350,29 +362,6 @@ function createChatBubble(pm, chatMessages, isSelf) {
     
     messageDiv.appendChild(timestampDiv);
     chatMessages.appendChild(messageDiv);
-}
-
-async function openChatWithUser(user) {
-    currentChatUser = {
-        user_id: user.user_id,
-        nickname: user.nickname
-    };
-     // Reset pagination when opening a new chat
-    currentMessagePage = 1;
-    try {
-        socket.send(JSON.stringify({
-            msgType: "getOrCreateChat",
-            receiver_user_id: user.user_id,
-            clearUnread: true
-        }));
-        setTimeout(() => {
-            console.log("Refreshing user list after opening chat");
-            requestUserListViaWebSocket();
-        }, 100);
-        // The rest is handled by the chatCreated/messages handlers
-    } catch (error) {
-        console.error('Chat error:', error);
-    }
 }
 
 function sendMessage() {
@@ -413,6 +402,8 @@ function sendMessage() {
         // Optionally, show error to user
     }
 }
+
+// ------------------------------------------------------------------------------ //
 
 function showTypingIndicator(nickname = "User") {
     const typingDiv = document.getElementById('typing-indicator');

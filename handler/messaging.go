@@ -37,7 +37,6 @@ func HandleWebSocketMessage(conn *websocket.Conn, msg model.WSMessage, user mode
 }
 
 func handleGetUsers(conn *websocket.Conn, msg model.WSMessage, user model.User) error {
-	log.Println("Handling getUsers request")
 
 	chatted, unchatted, err := ReadAllUsers(user.ID)
 	if err != nil {
@@ -64,7 +63,6 @@ func handleGetUsers(conn *websocket.Conn, msg model.WSMessage, user model.User) 
 }
 
 func handleSendMessage(conn *websocket.Conn, msg model.WSMessage, user model.User) error {
-	log.Println("Handling sendMessage request")
 
 	if msg.PrivateMessage.Message.ChatID == 0 ||
 		msg.ReceiverUserID == 0 ||
@@ -93,9 +91,7 @@ func handleSendMessage(conn *websocket.Conn, msg model.WSMessage, user model.Use
 
 	// Update the message in the response with the database values
 	if len(messages) > 0 {
-		log.Printf("Original message before update: %+v", msg.PrivateMessage) // DEBUGGING
 		msg.PrivateMessage = messages[0]
-		log.Printf("Updated message after fetch: %+v", msg.PrivateMessage) // DEBUGGING
 	}
 
 	// Set sender's user ID
@@ -117,7 +113,6 @@ func handleSendMessage(conn *websocket.Conn, msg model.WSMessage, user model.Use
     senderMsg.PrivateMessage.IsCreatedBy = true
 
 	// Confirm to sender
-	log.Printf("Sending message: %+v", senderMsg)
 	return conn.WriteJSON(senderMsg)
 }
 
@@ -161,45 +156,42 @@ func handleGetOrCreateChat(conn *websocket.Conn, msg model.WSMessage, user model
 			IsCreatedBy: false,
 		},
 	}
-	log.Printf("Sending chatCreated: %+v", response) 
 	return conn.WriteJSON(response)
 }
 
 func handleGetMessages(conn *websocket.Conn, msg model.WSMessage, user model.User) error {
     chatID := msg.PrivateMessage.Message.ChatID
-	log.Printf("[DEBUG] Fetching messages for chatID: %d", chatID)
     if chatID == 0 {
         log.Println("Invalid chat ID")
         return nil
     }
 
-    numberOfMessages := 10 // Default
+	numberOfMessages := 10
+	page := msg.Page
+	if page < 1 {
+		page = 1
+	}
 
-	// Calculate offset based on number of messages requested
-    // For first page (10 messages), offset = 0
-    // For second page (20 messages), offset = 10
-    // For third page (30 messages), offset = 20
-	offset := 0
-    if msg.NumberOfReplies > 10 {
-        offset = msg.NumberOfReplies - numberOfMessages
-    }
+	offset := (page - 1) * numberOfMessages
+	messages, err := ReadAllMessages(chatID, numberOfMessages, user.ID, offset)
 
-    messages, err := ReadAllMessages(chatID, numberOfMessages, user.ID, offset)
     if err != nil {
         log.Printf("Error reading messages: %v", err)
         return err
     }
-	log.Printf("Fetching messages for chat %d with limit %d and offset %d", 
-			chatID, numberOfMessages, offset)
-
+	log.Printf("Fetching messages for chat %d page %d with limit %d and offset %d", 
+			chatID, page, numberOfMessages, offset)
+			
+	hasMore := len(messages) == numberOfMessages
 
     return conn.WriteJSON(model.WSMessage{
         MsgType: "messages",
         UserID:  user.ID,
         Messages: messages,
+		Page: page,
+		HasMore: hasMore,
     })
 }
-
 
 func handleTyping(conn *websocket.Conn, msg model.WSMessage, user model.User) error {
     receiverKey := strconv.Itoa(msg.ReceiverUserID)

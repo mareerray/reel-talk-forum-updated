@@ -30,7 +30,6 @@ func InsertChat(user_id_1, user_id_2 int) (int, error) {
 		uuid, user_id_1, user_id_2,
 	)
 	if insertErr != nil {
-		// If it's a duplicate (unique constraint), try to find the existing chat's ID
 		if sqliteErr, ok := insertErr.(interface{ Error() string }); ok &&
 			strings.Contains(sqliteErr.Error(), "UNIQUE constraint failed") {
 			return FindChatIDbyUserIDS(user_id_1, user_id_2)
@@ -42,7 +41,6 @@ func InsertChat(user_id_1, user_id_2 int) (int, error) {
 }
 
 func FindChatIDbyUserIDS(user_id_1, user_id_2 int) (int, error) {
-	log.Printf("Finding chat between %d and %d", user_id_1, user_id_2)
 	if user_id_1 > user_id_2 {
 		user_id_1, user_id_2 = user_id_2, user_id_1
 	}
@@ -77,8 +75,6 @@ func InsertMessage(content string, user_id_from int, chatID int) error {
 		return updateErr
 	}
 
-	// insertQuery := `INSERT INTO messages (chat_id, user_id_from, content) VALUES (?, ?, ?);`
-	// insertQuery := `INSERT INTO messages (chat_id, user_id_from, content, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP);`
 	insertQuery := `INSERT INTO messages (chat_id, user_id_from, content, created_at) 
                 VALUES (?, ?, ?, CURRENT_TIMESTAMP)`;
 	_, insertErr := tx.Exec(insertQuery, chatID, user_id_from, content)
@@ -94,20 +90,6 @@ func InsertMessage(content string, user_id_from int, chatID int) error {
 	}
 	return nil
 }
-
-// func UpdateMessageStatus(messageID int, status string, user_id int) error {
-
-// 	updateQuery := `UPDATE messages
-// 					SET status = ?,
-// 						updated_at = CURRENT_TIMESTAMP,
-// 					WHERE id = ?;`
-// 	_, updateErr := DB.Exec(updateQuery, status, messageID)
-// 	if updateErr != nil {
-// 		return updateErr
-// 	}
-
-// 	return nil
-// }
 
 func UpdateChat(chatID int, userID int, tx *sql.Tx) (int, error) {
 	// Perform the update
@@ -187,7 +169,7 @@ func ReadAllUsers(userID int) ([]model.ChatUser, []model.ChatUser, error) {
 		err := rows.Scan(
 			&chatUser.Username,
 			&chatUser.UserID,
-			&chatUser.Age, // Direct field access
+			&chatUser.Age, 
 			&chatUser.Gender,
 			&chatUser.FirstName,
 			&chatUser.LastName,
@@ -290,9 +272,8 @@ func ClearUnreadMessages(userID int, senderID int) error {
     return nil
 }
 
-// ReadAllMessages retrieves the last N messages from a chat
 func ReadAllMessages(chatID int, numberOfMessages int, userID int, offset int) ([]model.PrivateMessage, error) {
-	var lastMessages []model.PrivateMessage
+	lastMessages := make([]model.PrivateMessage, 0)
 
 	// Query messages along with the sender's username
 	rows, selectError := DB.Query(`
@@ -345,5 +326,8 @@ func ReadAllMessages(chatID int, numberOfMessages int, userID int, offset int) (
 		return nil, err
 	}
 
+	if lastMessages == nil {
+    lastMessages = []model.PrivateMessage{}
+	}
 	return lastMessages, nil
 }
