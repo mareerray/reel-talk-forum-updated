@@ -49,13 +49,13 @@
 
     <!------Main page----------------------------------------------------------------------------------------->
 
-    <!-- <div id="mainView" class="main-view-hidden"> -->
+    <div id="mainView" class="main-view-hidden">
 
         <div class="main-container">
-            <!-- <h1 class="page-title">Hello, Username! </h1> -->
+            <h1 class="page-title">Hello, Username! </h1>
             <!-- Categories Sidebar -->
             <div class="category-bar">
-            <h3>Categories</h3>
+            <!-- <h3 class="category-title">Categories</h3> -->
 
             <div class="category-marquee" aria-label="Category carousel">
                 <div class="category-track-wrapper">
@@ -64,96 +64,97 @@
                 </div>
             </div>
         </div>                
+            <div class="main-container-main">
+                <!-- Posts Feed --> 
+                <div class="middle-container">
             
-            <!-- Posts Feed --> 
-            <div class="middle-container">
-        
-                <!-- Tabs for Post Feed, My Post, and Create Post -->
-                <ul class="nav nav-tabs nav-justified" id="tabView" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="post-feed-button" data-tab="post-feed-content" type="button" role="tab">Post Feed</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="my-profile-button" data-tab="my-profile-content" type="button" role="tab">My Profile</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="create-post-button" data-tab="create-post-content" type="button" role="tab">Create Post</button>
-                    </li>
-                </ul>
-        
-                <!-- Tab Content -->
-                <div class="tab-content">
-                    <!-- Posts Feed Tab -->
-                    <div class="tab-pane active" id="post-feed-content" role="tabpanel">
-                        <div class="post-grid">
-                            <!-- Posts will be loaded here dynamically -->
-                        </div>
-                    </div>
-        
-                    <!-- Profile Tab -->
-                    <div class="tab-pane" id="my-profile-content" role="tabpanel">                 
-                        <div class="profile-tab-container">
-                            <h1 id="profile-nickname">Nickname: </h1>
-                            <p id="profile-firstname">First Name: </p>
-                            <p id="profile-lastname">Last Name: </p>
-                            <p id="profile-age">Age: </p>
-                            <p id="profile-gender">Gender: </p>
-                            <p id="profile-email">Email: </p>  
-                        </div>
-                    </div>
-        
-                    <!-- Create Post Tab -->
-                    <div class="tab-pane" id="create-post-content" role="tabpanel">
-                        <div class="create-post-container">
-                                <div class="tab-container">
-                                    <h2>Create New Post</h2>
-                                    <form id="create-post-form">
-                                        <div class="form-group">
-                                            <label for="input-post-title">Title</label>
-                                            <input type="text" id = "input-post-title" name="title" id="input-post-title" required minlength="3" maxlength="100">
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label>Categories (select 1-3)</label>
-                                            <div id="categories-container" class="categories-selection">
-                                                <!-- Categories will be loaded here dynamically -->
-                                            </div>
-                                            <div id="categories-error" class="error-message"></div>
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label for="input-post-content">Content</label>
-                                            <textarea name="content" id="input-post-content" required minlength="5"></textarea>
-                                        </div>
-                                        
-                                        <button type="submit" id="submit-post">Create Post</button>
-                                    </form>
-                                </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Chat Container -->
-            <!-- Inside your main container -->
-            <div class="chat-container">
-                <div class="user-list-container">
-                    <ul id="userList">
+                    <!-- Tabs for Post Feed, My Post, and Create Post -->
+                    <ul class="nav nav-tabs nav-justified" id="tabView" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="post-feed-button" data-tab="post-feed-content" type="button" role="tab">Post Feed</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="my-profile-button" data-tab="my-profile-content" type="button" role="tab">My Profile</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="create-post-button" data-tab="create-post-content" type="button" role="tab">Create Post</button>
+                        </li>
                     </ul>
-                </div>
-                
-                <div class="chat-content" id="chat-content">
-                    <div class="message-list" id="chatBox"> 
-                        <!-- <h2 id="chatHeader"></h2> -->
-                        <div id="chatMessage">
-                        <!-- Messages display here -->
+            
+                    <!-- Tab Content -->
+                    <div class="tab-content">
+                        <!-- Posts Feed Tab -->
+                        <div class="tab-pane active" id="post-feed-content" role="tabpanel">
+                            <div class="post-grid">
+                                <!-- Posts will be loaded here dynamically -->
+                            </div>
+                        </div>
+            
+                        <!-- Profile Tab -->
+                        <div class="tab-pane" id="my-profile-content" role="tabpanel">                 
+                            <div class="profile-tab-container">
+                                <h1 id="profile-nickname">Nickname: </h1>
+                                <p id="profile-firstname">First Name: </p>
+                                <p id="profile-lastname">Last Name: </p>
+                                <p id="profile-age">Age: </p>
+                                <p id="profile-gender">Gender: </p>
+                                <p id="profile-email">Email: </p>  
+                            </div>
+                        </div>
+            
+                        <!-- Create Post Tab -->
+                        <div class="tab-pane" id="create-post-content" role="tabpanel">
+                            <div class="create-post-container">
+                                    <div class="tab-container">
+                                        <h2>Create New Post</h2>
+                                        <form id="create-post-form">
+                                            <div class="form-group">
+                                                <label for="input-post-title">Title</label>
+                                                <input type="text" id = "input-post-title" name="title" id="input-post-title" required minlength="3" maxlength="100">
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label>Categories (select 1-3)</label>
+                                                <div id="categories-container" class="categories-selection">
+                                                    <!-- Categories will be loaded here dynamically -->
+                                                </div>
+                                                <div id="categories-error" class="error-message"></div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="input-post-content">Content</label>
+                                                <textarea name="content" id="input-post-content" required minlength="5"></textarea>
+                                            </div>
+                                            
+                                            <button type="submit" id="submit-post">Create Post</button>
+                                        </form>
+                                    </div>
+                            </div>
                         </div>
                     </div>
-                    <div id="typing-indicator" class="typing-indicator-hidden"></div>
-                    <div class="message-input">
-                        <input type="text" id="messageInput" placeholder="Type a message...">
-                        <button id="sendButton">Send</button>
-                    </div>                    
+                </div>
+
+                <!-- Chat Container -->
+                <!-- Inside your main container -->
+                <div class="chat-container">
+                    <div class="user-list-container">
+                        <ul id="userList">
+                        </ul>
+                    </div>
+                    
+                    <div class="chat-content" id="chat-content">
+                        <div class="message-list" id="chatBox"> 
+                            <!-- <h2 id="chatHeader"></h2> -->
+                            <div id="chatMessage">
+                            <!-- Messages display here -->
+                            </div>
+                        </div>
+                        <div id="typing-indicator" class="typing-indicator-hidden"></div>
+                        <div class="message-input">
+                            <input type="text" id="messageInput" placeholder="Type a message...">
+                            <button id="sendButton">Send</button>
+                        </div>                    
+                    </div>
                 </div>
             </div>
         </div>

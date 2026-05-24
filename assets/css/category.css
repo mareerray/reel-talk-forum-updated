@@ -1,4 +1,5 @@
 .category-bar {
+  margin: 40px auto;
   width: 100%;
   overflow: hidden;
   grid-column: 1 / -1;
@@ -6,6 +7,7 @@
 
 .category-bar h3 {
   margin-bottom: 10px;
+  color: white;
 }
 
 .category-marquee {
@@ -16,7 +18,7 @@
 .category-track-wrapper {
   display: flex;
   width: max-content;
-  animation: scrollCategories 22s linear infinite;
+  animation: scrollCategories 5s linear infinite;
   will-change: transform;
 }
 
@@ -71,7 +73,7 @@
 
 @media (max-width: 900px) {
   .category-bar {
-    margin: 20px 0 10px;
+    margin: 50px 0 10px;
     width: 100%;
   }
 

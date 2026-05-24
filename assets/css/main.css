@@ -42,15 +42,15 @@ body.main-view .bg-container {
     overflow: auto;
 }
 
-.main-container {
+.main-container-main {
     display: grid;
-    grid-template-columns: 15% auto 40%;
+    grid-template-columns: auto 40%;
 }
 
 /* For screens ≤ 1500px, reduce sidebars and increase main content */
 @media (max-width: 1500px) {
-    .main-container {
-        grid-template-columns: 18% 1fr 38%;
+    .main-container-main {
+        grid-template-columns: 1fr 38%;
         gap: 10px;
     }
 }
@@ -60,7 +60,7 @@ body.main-view .bg-container {
     .bg-container {
         background-attachment: scroll; 
     }
-    .main-container {
+    .main-container-main {
         grid-template-columns: 1fr;
         margin-top: 10px;
         gap: 0;
@@ -93,7 +93,7 @@ body.main-view .bg-container {
 }
 
 .page-title {
-    margin-top: 50px;
+    margin-top: 80px;
     font-size: 1.5rem;
     color: white !important;
     text-align: center;
@@ -531,7 +531,7 @@ p {
 }
 
 @media (max-width: 900px) {
-    .main-container {
+    .main-container-main {
         grid-template-columns: 1fr; /* Stack columns on small screens */
         margin-top: 20px;
     }
@@ -545,7 +545,7 @@ p {
 }
 
 @media (max-width: 600px) {
-    .main-container {
+    .main-container-main {
         grid-template-columns: 1fr;
         margin-top: 10px;
     }
