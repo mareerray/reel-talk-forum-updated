@@ -9,7 +9,10 @@
 
 body {
     font-family: 'Montserrat', sans-serif;
-    background: #fff;
+    /* background-color: #FF4B2B; */
+    background-image: url('/assets/images/seatsmovietheater.jpg');
+
+    background-size: cover;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -71,9 +74,10 @@ a {
     flex-direction: column;
     width: 100%;
     max-width: 900px;
-    margin: 0 auto;
+    margin: 80px auto;
     padding: 2rem;
     background: #fff;
+    opacity: 0.9;
     border-radius: 12px;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
 }
