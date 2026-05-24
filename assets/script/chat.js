@@ -43,7 +43,7 @@ messageInput.addEventListener('input', () => {
 let socket;
 
 function initializeApp() {
-    const token = localStorage.getItem('sessionToken');
+    const token = sessionStorage.getItem('sessionToken');
     console.log('WebSocket token:', token);
     if (!token) {
         return;
@@ -374,7 +374,7 @@ function sendMessage() {
         console.error("Missing required fields for message");
         return;
     }
-    const sessionToken = localStorage.getItem('sessionToken');
+    const sessionToken = sessionStorage.getItem('sessionToken');
     if (!sessionToken) {
         console.error("No session token");
         return;

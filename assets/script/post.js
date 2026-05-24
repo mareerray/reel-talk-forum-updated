@@ -147,7 +147,7 @@ function showSinglePost(postId, post) {
         }
 
         // Get the authentication token
-        const token = localStorage.getItem('sessionToken');
+        const token = sessionStorage.getItem('sessionToken');
         if (!token) {
             alert("You must be logged in to comment.");
             return;

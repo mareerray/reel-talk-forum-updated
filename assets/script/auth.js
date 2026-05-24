@@ -234,9 +234,9 @@ logInForm.addEventListener('submit', function(e) {
     })
     .then(data => {
         if (data.success) {
-            // Store the session token in localStorage
-            localStorage.setItem('sessionToken', data.token);
-            localStorage.setItem("userNickname", data.nicknam || data.email); 
+            // Store the session token in sessionStorage
+            sessionStorage.setItem('sessionToken', data.token);
+            sessionStorage.setItem("userNickname", data.nickname || data.email); 
     
             // Update the navigation menu
             updateNavMenu(); 
@@ -286,7 +286,7 @@ function fetchUserProfile() {
         return response.json();
     })
     .then(data => {
-        localStorage.setItem("userNickname", data.nickname);
+        sessionStorage.setItem("userNickname", data.nickname);
         updateNavMenu();
         // Update the profile information in the UI
         document.getElementById('profile-nickname').textContent = 'Nickname: ' + data.nickname;
@@ -302,7 +302,7 @@ function fetchUserProfile() {
     .catch(error => {
         console.error('Error fetching profile:', error);
         // Clear invalid token and redirect to login
-        localStorage.removeItem("sessionToken");
+        sessionStorage.removeItem("sessionToken");
         document.getElementById("authView").style.display = "block";
         document.getElementById("mainView").style.display = "none";
         document.body.classList.add('auth-view');
@@ -314,7 +314,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-    const sessionToken = localStorage.getItem("sessionToken");
+    const sessionToken = sessionStorage.getItem("sessionToken");
 
     if (sessionToken) {
         document.getElementById("authView").style.display = "none";
@@ -337,8 +337,8 @@ document.addEventListener("DOMContentLoaded", () => {
 function updateNavMenu() {
     const navMenu = document.getElementById("nav-menu");
 
-    if (localStorage.getItem("sessionToken")) {
-        const userNickname = localStorage.getItem("userNickname") || "User";
+    if (sessionStorage.getItem("sessionToken")) {
+        const userNickname = sessionStorage.getItem("userNickname") || "User";
         navMenu.innerHTML = `
             <li><span class="user-display">User : ${userNickname}</span></li>
             <li><a href="#" id="logout-button">[Logout]</a></li>
@@ -379,7 +379,6 @@ function handleLogout(event) {
     }
 
     // Clear client-side storage
-    localStorage.clear();
     sessionStorage.clear();
 
     // Notify server

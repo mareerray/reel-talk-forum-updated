@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Check if user is logged in
-    const token = localStorage.getItem('sessionToken');
+    const token = sessionStorage.getItem('sessionToken');
 
     // Load categories when the page loads
     loadCategories();
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Function to load all available categories
 function loadCategories() {
-    const token = localStorage.getItem('sessionToken');
+    const token = sessionStorage.getItem('sessionToken');
     
     fetch('/api/categories', {
         method: 'GET',
@@ -139,7 +139,7 @@ function createPost(event) {
     };
         
     // Get auth token
-    const token = localStorage.getItem('sessionToken');
+    const token = sessionStorage.getItem('sessionToken');
     
     // Send request to create post
     fetch('/api/posts', {
