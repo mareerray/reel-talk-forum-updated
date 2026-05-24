@@ -28,16 +28,30 @@
     padding: 12px;
 }
 
-#userList {
+.user-section {
+    margin-bottom: 14px;
+}
+
+.list-header {
+    font-weight: 700;
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 1rem;
+    padding: 0 4px;
+}
+
+#chattedUserList,
+#unchattedUserList {
     list-style: none;
     padding: 0;
     margin: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
     gap: 10px;
 }
 
-#userList li {
+#chattedUserList li,
+#unchattedUserList li {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -45,7 +59,6 @@
     padding: 10px 14px;
     background-color: #f1f1f1;
     border-radius: 999px;
-    word-wrap: break-word;
     font-size: 0.8rem;
     text-align: center;
     cursor: pointer;
@@ -55,27 +68,12 @@
     border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-#userList li:hover {
+#chattedUserList li:hover,
+#unchattedUserList li:hover {
     background-color: #ebb866;
     color: #272626;
 }
 
-#userList li.online {
-    border-color: #ebb866;
-    box-shadow: 0 0 0 1px rgba(235, 184, 102, 0.18);
-}
-
-/* .user-list-container {
-    width: 25%;
-    min-width: 80px;
-    max-width: 320px;
-    background-color: #f9f9f9;
-    border-right: 1px solid #ddd;
-    border-radius: 4px;
-    overflow-y: auto;
-    box-sizing: border-box;
-    transition: width 0.3s;
-} */
 
 .userlist-header {
     font-weight: bold;
@@ -86,27 +84,9 @@
     padding: 5px 10px;
 }
 
-
-/* #userList {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-} */
-
 .list-header {
     font-size: 1rem !important;
 }
-
-/* #userList li {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    margin-bottom: 5px;
-    background-color: #f1f1f1;
-    border-radius: 5px;
-    word-wrap: break-word;
-    font-size: 0.8rem;
-} */
 
 /* Responsive: Stack user list above chat on small screens */
 .chat-content {

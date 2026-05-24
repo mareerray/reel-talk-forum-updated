@@ -179,52 +179,38 @@ function requestUserListViaWebSocket() {
 }
 
 function renderUserLists(chattedUsers, unchattedUsers) {
-    const userList = document.getElementById('userList');
-    userList.innerHTML = ''; // Clear previous contents
+    const chattedList = document.getElementById('chattedUserList');
+    const unchattedList = document.getElementById('unchattedUserList');
 
-    // Add Chatted Users Section
+    chattedList.innerHTML = '';
+    unchattedList.innerHTML = '';
+
     if (chattedUsers?.length > 0) {
-        // Header
-        const chattedHeader = document.createElement('li');
-        chattedHeader.className = 'list-header';
-        chattedHeader.textContent = 'Active Chats ▾';
-        userList.appendChild(chattedHeader);
-
-        // Users
         chattedUsers.forEach(user => {
             const li = document.createElement('li');
             li.className = 'user-item';
             const statusEmoji = user.isOnline ? ' 🟢' : ' ⚪';
             const notificationEmoji = user.hasUnread ? '🍿' : '';
 
-            li.textContent =  statusEmoji + ' ' + user.nickname + ' ' + notificationEmoji;
+            li.textContent = `${statusEmoji} ${user.nickname} ${notificationEmoji}`;
             li.addEventListener('click', () => openChatWithUser(user));
-            userList.appendChild(li);
+            chattedList.appendChild(li);
         });
     }
 
-    // Add Unchatted Users Section
     if (unchattedUsers?.length > 0) {
-        // Header
-        const unchattedHeader = document.createElement('li');
-        unchattedHeader.className = 'list-header';
-        unchattedHeader.textContent = 'Other Users ▾';
-        userList.appendChild(unchattedHeader);
-
-        // Users
         unchattedUsers.forEach(user => {
             const li = document.createElement('li');
             li.className = 'user-item';
             const statusEmoji = user.isOnline ? ' 🟢' : ' ⚪';
             const notificationEmoji = user.hasUnread ? '🍿' : '';
-            
-            li.textContent = statusEmoji + ' ' + user.nickname + ' ' + notificationEmoji;
+
+            li.textContent = `${statusEmoji} ${user.nickname} ${notificationEmoji}`;
             li.addEventListener('click', () => openChatWithUser(user));
-            userList.appendChild(li);
+            unchattedList.appendChild(li);
         });
     }
 }
-
 async function openChatWithUser(user) {
     currentChatUser = {
         user_id: user.user_id,
