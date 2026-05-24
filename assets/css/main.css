@@ -2,11 +2,12 @@
 // General Styles
 // --------------------------------------------------------------------------------*/
 @import url('https://fonts.googleapis.com/css?family=Montserrat:400,800');
+
 * {
     box-sizing: border-box;
 }
 
-html{
+html {
     overflow: auto;
     overscroll-behavior: none;
     height: 100%;
@@ -17,7 +18,7 @@ html{
 
 .bg-container {
     position: fixed;
-    top: 0; 
+    top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
@@ -29,13 +30,14 @@ html{
 }
 
 body.main-view .bg-container {
-    display: block; /* Show background for main view */
+    display: block;
+    /* Show background for main view */
     padding-bottom: 40px;
     min-height: 100vh;
 }
 
 #mainView {
-    font-family:'Montserrat', sans-serif;
+    font-family: 'Montserrat', sans-serif;
     width: 100vw;
     height: 100vh;
     margin: 20px;
@@ -45,8 +47,8 @@ body.main-view .bg-container {
 #mainView,
 .main-container,
 .middle-container {
-  width: 100%;
-  max-width: 100%;
+    width: 100%;
+    max-width: 100%;
 }
 
 .main-container-main {
@@ -63,11 +65,12 @@ body.main-view .bg-container {
     }
 }
 
-    /* For screens ≤ 1096px, stack columns vertically */
+/* For screens ≤ 1096px, stack columns vertically */
 @media (max-width: 1096px) {
     .bg-container {
-        background-attachment: scroll; 
+        background-attachment: scroll;
     }
+
     .main-container-main {
         grid-template-columns: 1fr;
         margin-top: 10px;
@@ -87,16 +90,22 @@ body.main-view .bg-container {
 .middle-container {
     border-radius: 8px;
     padding: 24px 40px;
-    width: 100%;             /* ensure it fills the grid area */
+    width: 100%;
+    /* ensure it fills the grid area */
     box-sizing: border-box;
 }
+
 .tab-content,
 .post-grid,
 .create-post-container {
-    width: 100%;         /* Fill the parent (e.g., .middle-container) */
-    max-width: 1000px;    /* Or whatever width you prefer */
-    min-width: 300px;    /* Optional: prevents being too narrow */
-    margin: 0 auto;      /* Center horizontally */
+    width: 100%;
+    /* Fill the parent (e.g., .middle-container) */
+    max-width: 1000px;
+    /* Or whatever width you prefer */
+    min-width: 300px;
+    /* Optional: prevents being too narrow */
+    margin: 0 auto;
+    /* Center horizontally */
     box-sizing: border-box;
 }
 
@@ -124,7 +133,7 @@ body.main-view .bg-container {
     flex: 1 1 0;
 }
 
-.nav-link{
+.nav-link {
     width: 100%;
     text-align: center;
     display: flex;
@@ -158,20 +167,20 @@ body.main-view .bg-container {
 }
 
 .nav-tabs .nav-link:not(.active) {
-    border-color: white; 
+    border-color: white;
 }
 
 .nav-link:not(.active):hover {
-    color: #e2e6ea; 
+    color: #e2e6ea;
 }
 
-.tab-pane { 
-    display: none; 
+.tab-pane {
+    display: none;
 
 }
 
-.tab-pane.active { 
-    display: block; 
+.tab-pane.active {
+    display: block;
 }
 
 /* Responsive: Stack tabs on small screens */
@@ -180,9 +189,11 @@ body.main-view .bg-container {
         flex-direction: column;
         gap: 0;
     }
+
     .nav-item {
         width: 100%;
     }
+
     .nav-link {
         width: 100%;
         margin-right: 0;
@@ -194,19 +205,39 @@ body.main-view .bg-container {
 /* --------------------------------------------------------------------------------*/
 
 .post-grid {
-    gap: 3px; /* Controls spacing between posts */
+    gap: 3px;
+    /* Controls spacing between posts */
     /* max-width: 1000px; */
     overflow-y: auto;
-    max-height: 850px; 
+    max-height: 850px;
     margin: 0 auto;
     padding: 5px 10px;
-    scrollbar-width: thin;
-    scrollbar-color: #999 transparent; /* thumb color, track color */
+    /* Use modern scrollbar-color where supported (Chrome >=121, Firefox, etc.)
+       Fallbacks below use WebKit scrollbar pseudo-elements for older WebKit/Blink browsers */
+    @supports (scrollbar-color: auto) {
+        scrollbar-color: #999 transparent;
+    }
+    /* thumb color, track color */
+}
+
+.post-grid::-webkit-scrollbar {
+    width: 8px;
+}
+
+.post-grid::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.post-grid::-webkit-scrollbar-thumb {
+    background-color: #999;
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
 }
 
 .post-container {
     background-color: rgba(255, 255, 255, 0.899);
-    margin: 5px auto 0 ;
+    margin: 5px auto 0;
     padding: 10px;
     /* height: 170px; */
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -231,13 +262,15 @@ body.main-view .bg-container {
     color: rgb(131, 30, 30);
 }
 
-.post-categories, .post-info {
+.post-categories,
+.post-info {
     color: #6c757d;
     font-size: 0.85rem;
 }
 
 p {
-    margin: 0; /* Removes all margins */
+    margin: 0;
+    /* Removes all margins */
     font-size: 0.8rem;
 }
 
@@ -246,7 +279,7 @@ p {
     margin: 8px 0;
     word-wrap: break-word;
     overflow-wrap: break-word;
-    max-height: 200px; 
+    max-height: 200px;
     font-size: 0.9rem;
 }
 
@@ -259,7 +292,7 @@ p {
 
 .single-post-container {
     background-color: rgba(255, 255, 255, 0.899);
-    margin: 10px auto 0 ;
+    margin: 10px auto 0;
     padding: 20px;
     /* max-width: 800px; */
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -284,7 +317,8 @@ p {
     font-size: 0.8rem;
 }
 
-.comments-section h3, .add-comment h4 {
+.comments-section h3,
+.add-comment h4 {
     color: #333;
     font-size: 1rem;
     font-weight: bold;
@@ -299,14 +333,19 @@ p {
     padding: 10px;
     resize: none;
     font-size: 0.8rem;
-    font-family: 'Montserrat', sans-serif;;
+    font-family: 'Montserrat', sans-serif;
+    ;
 }
 
-.back-to-post-button{
-    background-color: transparent; /* Normal state: grey background */
-    border: 1px solid grey; /* Optional: match border to background for seamless look */
-    color: #333; /* Text color, adjust as needed */
-    transition: background-color 0.3s, border-color 0.3s; /* Smooth transition */
+.back-to-post-button {
+    background-color: transparent;
+    /* Normal state: grey background */
+    border: 1px solid grey;
+    /* Optional: match border to background for seamless look */
+    color: #333;
+    /* Text color, adjust as needed */
+    transition: background-color 0.3s, border-color 0.3s;
+    /* Smooth transition */
     margin-bottom: 10px;
     border-radius: 20px;
     font-size: 14px;
@@ -316,8 +355,10 @@ p {
 }
 
 .back-to-post-button:hover {
-    background-color: grey; /* Hover state: transparent background */
-    border-color: grey; /* Keep border grey or change as desired */
+    background-color: grey;
+    /* Hover state: transparent background */
+    border-color: grey;
+    /* Keep border grey or change as desired */
     color: #ced4da;
 }
 
@@ -347,19 +388,21 @@ p {
 /* --------------------------------------------------------------------------------*/
 
 .user-display {
-    color: #fff; /* Adjust color to match your theme */
+    color: #fff;
+    /* Adjust color to match your theme */
     margin-right: 5px;
     font-size: 1.1rem;
 }
 
 .profile-tab-container {
     width: 100%;
-    max-width: 1000px; /* or 900px, to match your other sections */
+    max-width: 1000px;
+    /* or 900px, to match your other sections */
     margin: 8px auto;
     background-color: #f8f9fa;
     border-radius: 10px;
     padding: 16px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
 }
 
@@ -426,7 +469,7 @@ p {
     font-family: 'Montserrat', sans-serif;
     font-size: 0.9rem;
     transition: border-color 0.3s ease;
-    
+
 }
 
 #create-post-form input[type="text"]:focus,
@@ -440,7 +483,7 @@ p {
     min-height: 150px;
     max-height: 400px;
     resize: none;
-    
+
 }
 
 /* Category selection styling */
@@ -457,14 +500,14 @@ p {
 .category-checkbox {
     display: flex;
     align-items: center;
-    background-color: transparent; 
+    background-color: transparent;
     padding: 2px 5px;
-    border: none; 
+    border: none;
     cursor: pointer;
-    box-sizing: border-box; 
-    overflow: hidden; 
-    white-space: nowrap; 
-    text-overflow: ellipsis; 
+    box-sizing: border-box;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .category-checkbox input[type="radio"] {
@@ -482,7 +525,8 @@ p {
     color: red;
     font-size: 14px;
     margin-top: 5px;
-    grid-column: 1 / -1; /* Make error message span all columns */
+    grid-column: 1 / -1;
+    /* Make error message span all columns */
 }
 
 /* Submit button styling */
@@ -513,42 +557,46 @@ p {
 @media (max-width: 768px) {
     #create-post-content .tab-container {
         padding: 15px;
-        margin: 0 10px; 
+        margin: 0 10px;
     }
-    
+
     #create-post-form input[type="text"],
     #create-post-form textarea {
         padding: 10px;
     }
 
     .categories-selection {
-        grid-template-columns: repeat(2, 1fr); /* Change to 2 columns */
+        grid-template-columns: repeat(2, 1fr);
+        /* Change to 2 columns */
     }
-    
+
     .category-checkbox {
         padding: 6px 10px;
         font-size: 0.8rem;
     }
-    
+
     #submit-post {
         padding: 10px 20px;
         font-size: 0.8rem;
-        width: 100%; 
-        max-width: 300px; 
+        width: 100%;
+        max-width: 300px;
     }
 }
 
 @media (max-width: 900px) {
     .main-container-main {
-        grid-template-columns: 1fr; /* Stack columns on small screens */
+        grid-template-columns: 1fr;
+        /* Stack columns on small screens */
         margin-top: 20px;
     }
-    .middle-container, .chat-container {
+
+    .middle-container,
+    .chat-container {
         margin-left: 0;
         width: 100%;
         max-width: 100vw;
     }
-   
+
 }
 
 @media (max-width: 600px) {
@@ -557,24 +605,29 @@ p {
         margin-top: 10px;
         margin-bottom: 20px;
     }
-    .middle-container, .chat-container {
+
+    .middle-container,
+    .chat-container {
         padding: 8px 2vw;
         font-size: 0.95rem;
     }
+
     #create-post-content h2 {
         font-size: 1.3rem;
     }
-    
+
     .categories-selection {
-        grid-template-columns: 1fr; /* Single column on very small screens */
+        grid-template-columns: 1fr;
+        /* Single column on very small screens */
     }
-    
+
     #create-post-form label {
         font-size: 0.85rem;
     }
-    
+
     #create-post-form textarea {
-        min-height: 120px; /* Smaller height on mobile */
+        min-height: 120px;
+        /* Smaller height on mobile */
     }
 }
 

@@ -17,6 +17,56 @@
 
 .user-list-container {
     width: 25%;
+    min-width: 220px;
+    max-width: 320px;
+    background-color: #f9f9f9;
+    border-right: 1px solid #ddd;
+    border-radius: 10px 0 0 10px;
+    overflow: hidden;
+    box-sizing: border-box;
+    transition: width 0.3s;
+    padding: 12px;
+}
+
+#userList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    gap: 10px;
+}
+
+#userList li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 10px 14px;
+    background-color: #f1f1f1;
+    border-radius: 999px;
+    word-wrap: break-word;
+    font-size: 0.8rem;
+    text-align: center;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+#userList li:hover {
+    background-color: #ebb866;
+    color: #272626;
+}
+
+#userList li.online {
+    border-color: #ebb866;
+    box-shadow: 0 0 0 1px rgba(235, 184, 102, 0.18);
+}
+
+/* .user-list-container {
+    width: 25%;
     min-width: 80px;
     max-width: 320px;
     background-color: #f9f9f9;
@@ -25,7 +75,7 @@
     overflow-y: auto;
     box-sizing: border-box;
     transition: width 0.3s;
-}
+} */
 
 .userlist-header {
     font-weight: bold;
@@ -37,17 +87,17 @@
 }
 
 
-#userList {
+/* #userList {
     list-style-type: none;
     padding: 0;
     margin: 0;
-}
+} */
 
 .list-header {
     font-size: 1rem !important;
 }
 
-#userList li {
+/* #userList li {
     display: flex;
     align-items: center;
     padding: 10px;
@@ -56,7 +106,7 @@
     border-radius: 5px;
     word-wrap: break-word;
     font-size: 0.8rem;
-}
+} */
 
 /* Responsive: Stack user list above chat on small screens */
 .chat-content {
@@ -258,7 +308,6 @@
     .chat-container {
         flex-direction: column;
         min-height: 400px;
-        /* height: calc(100vh - 50px); */
         margin: 20px 0;
         padding-bottom: 20px;
     }
@@ -269,12 +318,25 @@
         max-width: 100vw;
         border-right: none;
         border-bottom: 1px solid #ddd;
+        border-radius: 10px 10px 0 0;
+        min-height: auto;
+        max-height: none;
+        order: 0;
+        flex-shrink: 0;
+        overflow: visible;
+    }
+    /* .user-list-container {
+        width: 100%;
+        min-width: 0;
+        max-width: 100vw;
+        border-right: none;
+        border-bottom: 1px solid #ddd;
         min-height: 80px;
         max-height: 150px;
         order: 0;
         flex-shrink: 0; 
         overscroll-behavior: contain;
-    }   
+    }    */
         
 
     .chat-content {

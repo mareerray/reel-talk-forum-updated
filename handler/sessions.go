@@ -13,36 +13,36 @@ import (
 )
 
 func CheckUserLoggedIn(r *http.Request) (bool, int) {
-    sessionToken, err := r.Cookie("session_token")
-    if err != nil {
-        return false, 0
-    }
+	sessionToken, err := r.Cookie("session_token")
+	if err != nil {
+		return false, 0
+	}
 
-    var userID int
-    var expiresAt time.Time
+	var userID int
+	var expiresAt time.Time
 
-    query := `
+	query := `
     SELECT user_id, session_expiry
     FROM sessions
     WHERE session_token = $1
       AND is_active = true
     `
 
-    err = DB.QueryRow(query, sessionToken.Value).Scan(&userID, &expiresAt)
-    if err != nil {
-        if err == sql.ErrNoRows {
-            return false, 0
-        }
-        log.Printf("Error checking session: %v", err)
-        return false, 0
-    }
+	err = DB.QueryRow(query, sessionToken.Value).Scan(&userID, &expiresAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false, 0
+		}
+		log.Printf("Error checking session: %v", err)
+		return false, 0
+	}
 
-    if time.Now().After(expiresAt) {
-        DeleteSession(sessionToken.Value)
-        return false, 0
-    }
+	if time.Now().After(expiresAt) {
+		DeleteSession(sessionToken.Value)
+		return false, 0
+	}
 
-    return true, userID
+	return true, userID
 }
 
 func InsertSession(session *model.Session) (*model.Session, error) {
@@ -99,23 +99,23 @@ func InsertSession(session *model.Session) (*model.Session, error) {
 // -- Only insert a new session and does not delete old ones since we allow multiple sessions per user -- //
 
 func CreateSession(w http.ResponseWriter, userID int) error {
-    token, cookie, err := generateSessionToken()
-    if err != nil {
-        return err
-    }
+	token, cookie, err := generateSessionToken()
+	if err != nil {
+		return err
+	}
 
-    query := `
+	query := `
     INSERT INTO sessions (user_id, session_token, session_expiry, is_active)
     VALUES ($1, $2, $3, true)
     `
 
-    _, err = DB.Exec(query, userID, token, cookie.Expires)
-    if err != nil {
-        return fmt.Errorf("failed to insert session: %v", err)
-    }
+	_, err = DB.Exec(query, userID, token, cookie.Expires)
+	if err != nil {
+		return fmt.Errorf("failed to insert session: %v", err)
+	}
 
-    http.SetCookie(w, cookie)
-    return nil
+	http.SetCookie(w, cookie)
+	return nil
 }
 
 // -- Non-Global Functions : Only happens in this package server -- //
@@ -128,39 +128,38 @@ func DeleteSession(token string) {
 }
 
 func generateSessionToken() (string, *http.Cookie, error) {
-    token, err := utils.GenerateUuid()
-    if err != nil {
-        return "", nil, err
-    }
+	token, err := utils.GenerateUuid()
+	if err != nil {
+		return "", nil, err
+	}
 
-    expiration := time.Now().Add(24 * time.Hour)
-    cookie := &http.Cookie{
-        Name:     "session_token",
-        Value:    token,
-        Expires:  expiration,
-        Path:     "/",
-        HttpOnly: true,      // Prevent XSS
-        Secure:   true,     // Allow HTTP for local development
-        SameSite: http.SameSiteLaxMode,  // Prevent CSRF
-        MaxAge:   86400,     // 24h in seconds (backup for Expires)
-    }
-    return token, cookie, nil
+	expiration := time.Now().Add(24 * time.Hour)
+	cookie := &http.Cookie{
+		Name:     "session_token",
+		Value:    token,
+		Expires:  expiration,
+		Path:     "/",
+		HttpOnly: true,                 // Prevent XSS
+		Secure:   true,                 // Allow HTTP for local development
+		SameSite: http.SameSiteLaxMode, // Prevent CSRF
+		MaxAge:   86400,                // 24h in seconds (backup for Expires)
+	}
+	return token, cookie, nil
 }
 
-
 func ValidateSessionHandler(w http.ResponseWriter, r *http.Request) {
-    w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 
-    authHeader := r.Header.Get("Authorization")
-    if authHeader == "" {
-        http.Error(w, "Missing authorization header", http.StatusUnauthorized)
-        return
-    }
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		http.Error(w, "Missing authorization header", http.StatusUnauthorized)
+		return
+	}
 
-    token := strings.TrimPrefix(authHeader, "Bearer ")
+	token := strings.TrimPrefix(authHeader, "Bearer ")
 
-    var userID int
-    err := DB.QueryRow(`
+	var userID int
+	err := DB.QueryRow(`
         SELECT user_id
         FROM sessions
         WHERE session_token = $1
@@ -168,17 +167,17 @@ func ValidateSessionHandler(w http.ResponseWriter, r *http.Request) {
           AND session_expiry > NOW()
     `, token).Scan(&userID)
 
-    if err != nil {
-        if err == sql.ErrNoRows {
-            http.Error(w, "Invalid session", http.StatusUnauthorized)
-            return
-        }
-        http.Error(w, "Database error", http.StatusInternalServerError)
-        return
-    }
+	if err != nil {
+		if err == sql.ErrNoRows {
+			http.Error(w, "Invalid session", http.StatusUnauthorized)
+			return
+		}
+		http.Error(w, "Database error", http.StatusInternalServerError)
+		return
+	}
 
-    json.NewEncoder(w).Encode(map[string]interface{}{
-        "success": true,
-        "user_id": userID,
-    })
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"user_id": userID,
+	})
 }

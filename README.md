@@ -1,6 +1,6 @@
 # ReelTalk Forum 🍿
 
-**A modern, real-time forum with private messaging powered by WebSockets**  
+**A modern real-time forum with private messaging powered by WebSockets, using Supabase as the database and deployed on Render.**  
 *Last Updated: May 21, 2025*
 
 ---
@@ -39,47 +39,58 @@ Admin
 
 ## 🛠 Tech Stack
 
-| Component       | Technology                          |
-|-----------------|-------------------------------------|
-| **Database**    | SQLite                              |
-| **Backend**     | Golang (HTTP server, WebSockets)    |
-| **Frontend**    | Vanilla JavaScript + CSS3, HTML5          |
-| **Auth**        | UUID sessions + bcrypt              |
+| Component    | Technology |
+| --- | --- |
+| Database     | Supabase PostgreSQL |
+| Backend      | Go, HTTP server, WebSockets |
+| Frontend     | HTML5, CSS3, Vanilla JavaScript |
+| Auth         | UUID sessions, bcrypt |
+| Deployment   | Render |
 
-**Key Packages**:  
-`gorilla/websocket` `sqlite3` `uuid` `bcrypt`
 
 ---
 
-## ⚙️ Installation
+## Installation
 
-1. Clone repo
+1. Clone the repository:
+```bash
 git clone https://01.gritlab.ax/git/mreunsat/real-time-forum
-
-2. Install dependencies
 ```
-go mod init real-time-forum
+
+2. Install dependencies:
+```bash
 go mod tidy
-````
-
-3. Initialize database & start server
 ```
+
+3. Set up your environment variables for Supabase and any other required secrets.
+
+4. Run the app locally:
+```bash
 go run .
 ```
-4. Start server
 
-Visit `http://localhost:8999` in your browser!
+5. Open your browser and visit:
+```text
+http://localhost:8999
+```
+
+---
+
+## Deployment
+
+This project is deployed on Render. The database is powered by Supabase PostgreSQL, and the required connection values are configured through environment variables on Render.
 
 ---
 
 ## 🧠 Learning Outcomes
 
-This project teaches:
-- **Web Fundamentals**: HTTP, cookies, DOM manipulation
-- **Real-Time Systems**: WebSocket implementation
-- **Concurrency**: Go routines/channels for message brokering
-- **SQL**: Complex queries for message pagination
-- **Performance**: Throttling/debouncing scroll events
+This project helped me learn:
+- **Web Fundamentals**: HTTP, cookies, and DOM manipulation.
+- **Real-Time Systems**: WebSocket-based communication.
+- **Concurrency**: Go routines and channels for message handling.
+- **Databases**: PostgreSQL queries, data modeling, and pagination.
+- **Deployment**: Hosting an app on Render and managing environment variables.
+- **Performance**: Throttling and debouncing scroll events.
 
 ---
 
