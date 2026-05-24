@@ -84,111 +84,197 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+    w.Header().Set("Content-Type", "application/json")
 
-	if r.Method != http.MethodPost {
-		respondJSON(w, http.StatusMethodNotAllowed, model.Response{
-			Success: false,
-			Message: "Method not allowed",
-		})
-		return
-	}
+    if r.Method != http.MethodPost {
+        respondJSON(w, http.StatusMethodNotAllowed, model.Response{
+            Success: false,
+            Message: "Method not allowed",
+        })
+        return
+    }
 
-	log.Println("Received login request")
+    log.Println("Received login request")
 
-	var req model.LoginRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		respondJSON(w, http.StatusBadRequest, model.Response{
-			Success: false,
-			Message: "Invalid request format",
-		})
-		return
-	}
+    var req model.LoginRequest
+    if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+        respondJSON(w, http.StatusBadRequest, model.Response{
+            Success: false,
+            Message: "Invalid request format",
+        })
+        return
+    }
 
-	var userID int
-	var nickname, hashedPassword, userUUID string
-	var query string
+    var userID int
+    var nickname, hashedPassword, userUUID string
+    var query string
 
-	if req.LoginType == "email" {
-		query = "SELECT id, nickname, password_hash, uuid FROM users WHERE email = $1"
-	} else {
-		query = "SELECT id, nickname, password_hash, uuid FROM users WHERE nickname = $1"
-	}
+    if req.LoginType == "email" {
+        query = "SELECT id, nickname, password_hash, uuid FROM users WHERE email = $1"
+    } else {
+        query = "SELECT id, nickname, password_hash, uuid FROM users WHERE nickname = $1"
+    }
 
-	err := DB.QueryRow(query, req.Identifier).Scan(&userID, &nickname, &hashedPassword, &userUUID)
-	if err != nil {
-		log.Printf("Login error: %v", err)
-		respondWithError(w, "Invalid credentials", "login-general", http.StatusUnauthorized)
-		return
-	}
+    err := DB.QueryRow(query, req.Identifier).Scan(&userID, &nickname, &hashedPassword, &userUUID)
+    if err != nil {
+        log.Printf("Login error: %v", err)
+        respondWithError(w, "Invalid credentials", "login-general", http.StatusUnauthorized)
+        return
+    }
 
-	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(req.Password))
-	if err != nil {
-		log.Printf("Password verification failed: %v", err)
-		respondWithError(w, "Invalid credentials", "login-general", http.StatusUnauthorized)
-		return
-	}
+    err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(req.Password))
+    if err != nil {
+        log.Printf("Password verification failed: %v", err)
+        respondWithError(w, "Invalid credentials", "login-general", http.StatusUnauthorized)
+        return
+    }
 
-	sessionToken, err := utils.GenerateUuid()
-	if err != nil {
-		log.Printf("Failed to generate session token: %v", err)
-		respondWithError(w, "Error creating session", "login-general", http.StatusInternalServerError)
-		return
-	}
-	expiresAt := time.Now().Add(24 * time.Hour)
+    sessionToken, err := utils.GenerateUuid()
+    if err != nil {
+        log.Printf("Failed to generate session token: %v", err)
+        respondWithError(w, "Error creating session", "login-general", http.StatusInternalServerError)
+        return
+    }
 
-	tx, err := DB.Begin()
-	if err != nil {
-		log.Printf("Failed to begin transaction: %v", err)
-		respondWithError(w, "Error creating session", "login-general", http.StatusInternalServerError)
-		return
-	}
+    expiresAt := time.Now().Add(24 * time.Hour)
 
-	_, delErr := tx.Exec("DELETE FROM sessions WHERE user_id = $1", userID)
-	if delErr != nil {
-		tx.Rollback()
-		log.Printf("Failed to clear existing sessions: %v", delErr)
-		respondWithError(w, "Login conflict", "login-general", http.StatusConflict)
-		return
-	}
+    _, err = DB.Exec(
+        "INSERT INTO sessions (id, user_id, is_active, session_token, session_expiry) VALUES ($1, $2, $3, $4, $5)",
+        sessionToken, userID, true, sessionToken, expiresAt,
+    )
+    if err != nil {
+        log.Printf("Failed to create session record: %v", err)
+        respondWithError(w, "Error creating session", "login-general", http.StatusInternalServerError)
+        return
+    }
 
-	_, err = tx.Exec(
-		"INSERT INTO sessions (id, user_id, is_active, session_token, session_expiry) VALUES ($1, $2, $3, $4, $5)",
-		sessionToken, userID, true, sessionToken, expiresAt,
-	)
-	if err != nil {
-		tx.Rollback()
-		log.Printf("Failed to create session record: %v", err)
-		respondWithError(w, "Error creating session", "login-general", http.StatusInternalServerError)
-		return
-	}
+    http.SetCookie(w, &http.Cookie{
+        Name:     "session_token",
+        Value:    sessionToken,
+        Path:     "/",
+        MaxAge:   86400,
+        HttpOnly: true,
+        Secure:   false,
+        SameSite: http.SameSiteLaxMode,
+    })
 
-	if err = tx.Commit(); err != nil {
-		log.Printf("Failed to commit transaction: %v", err)
-		respondWithError(w, "Error creating session", "login-general", http.StatusInternalServerError)
-		return
-	}
+    log.Println("User logged in successfully")
+    json.NewEncoder(w).Encode(model.Response{
+        Success: true,
+        Message: "Login successful",
+        Token:   sessionToken,
+    })
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session_token",
-		Value:    sessionToken,
-		Path:     "/",
-		MaxAge:   86400,
-		HttpOnly: true,
-		Secure:   false,
-		SameSite: http.SameSiteLaxMode,
-	})
-
-	log.Println("User logged in successfully")
-	json.NewEncoder(w).Encode(model.Response{
-		Success: true,
-		Message: "Login successful",
-		Token:   sessionToken,
-	})
-
-	log.Printf("Login success - UserID: %d, Nickname: %s, UUID: %s", userID, nickname, userUUID)
-	log.Printf("Session created - Token: %s → UserID: %d", sessionToken, userID)
+    log.Printf("Login success - UserID: %d, Nickname: %s, UUID: %s", userID, nickname, userUUID)
+    log.Printf("Session created - Token: %s → UserID: %d", sessionToken, userID)
 }
+
+// func LoginHandler(w http.ResponseWriter, r *http.Request) {
+// 	w.Header().Set("Content-Type", "application/json")
+
+// 	if r.Method != http.MethodPost {
+// 		respondJSON(w, http.StatusMethodNotAllowed, model.Response{
+// 			Success: false,
+// 			Message: "Method not allowed",
+// 		})
+// 		return
+// 	}
+
+// 	log.Println("Received login request")
+
+// 	var req model.LoginRequest
+// 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+// 		respondJSON(w, http.StatusBadRequest, model.Response{
+// 			Success: false,
+// 			Message: "Invalid request format",
+// 		})
+// 		return
+// 	}
+
+// 	var userID int
+// 	var nickname, hashedPassword, userUUID string
+// 	var query string
+
+// 	if req.LoginType == "email" {
+// 		query = "SELECT id, nickname, password_hash, uuid FROM users WHERE email = $1"
+// 	} else {
+// 		query = "SELECT id, nickname, password_hash, uuid FROM users WHERE nickname = $1"
+// 	}
+
+// 	err := DB.QueryRow(query, req.Identifier).Scan(&userID, &nickname, &hashedPassword, &userUUID)
+// 	if err != nil {
+// 		log.Printf("Login error: %v", err)
+// 		respondWithError(w, "Invalid credentials", "login-general", http.StatusUnauthorized)
+// 		return
+// 	}
+
+// 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(req.Password))
+// 	if err != nil {
+// 		log.Printf("Password verification failed: %v", err)
+// 		respondWithError(w, "Invalid credentials", "login-general", http.StatusUnauthorized)
+// 		return
+// 	}
+
+// 	sessionToken, err := utils.GenerateUuid()
+// 	if err != nil {
+// 		log.Printf("Failed to generate session token: %v", err)
+// 		respondWithError(w, "Error creating session", "login-general", http.StatusInternalServerError)
+// 		return
+// 	}
+// 	expiresAt := time.Now().Add(24 * time.Hour)
+
+// 	tx, err := DB.Begin()
+// 	if err != nil {
+// 		log.Printf("Failed to begin transaction: %v", err)
+// 		respondWithError(w, "Error creating session", "login-general", http.StatusInternalServerError)
+// 		return
+// 	}
+
+// 	// _, delErr := tx.Exec("DELETE FROM sessions WHERE user_id = $1", userID)
+// 	// if delErr != nil {
+// 	// 	tx.Rollback()
+// 	// 	log.Printf("Failed to clear existing sessions: %v", delErr)
+// 	// 	respondWithError(w, "Login conflict", "login-general", http.StatusConflict)
+// 	// 	return
+// 	// }
+
+// 	_, err = tx.Exec(
+// 		"INSERT INTO sessions (id, user_id, is_active, session_token, session_expiry) VALUES ($1, $2, $3, $4, $5)",
+// 		sessionToken, userID, true, sessionToken, expiresAt,
+// 	)
+// 	if err != nil {
+// 		tx.Rollback()
+// 		log.Printf("Failed to create session record: %v", err)
+// 		respondWithError(w, "Error creating session", "login-general", http.StatusInternalServerError)
+// 		return
+// 	}
+
+// 	if err = tx.Commit(); err != nil {
+// 		log.Printf("Failed to commit transaction: %v", err)
+// 		respondWithError(w, "Error creating session", "login-general", http.StatusInternalServerError)
+// 		return
+// 	}
+
+// 	http.SetCookie(w, &http.Cookie{
+// 		Name:     "session_token",
+// 		Value:    sessionToken,
+// 		Path:     "/",
+// 		MaxAge:   86400,
+// 		HttpOnly: true,
+// 		Secure:   false,
+// 		SameSite: http.SameSiteLaxMode,
+// 	})
+
+// 	log.Println("User logged in successfully")
+// 	json.NewEncoder(w).Encode(model.Response{
+// 		Success: true,
+// 		Message: "Login successful",
+// 		Token:   sessionToken,
+// 	})
+
+// 	log.Printf("Login success - UserID: %d, Nickname: %s, UUID: %s", userID, nickname, userUUID)
+// 	log.Printf("Session created - Token: %s → UserID: %d", sessionToken, userID)
+// }
 
 func respondWithError(w http.ResponseWriter, message, field string, statusCode int) {
 	w.WriteHeader(statusCode)
