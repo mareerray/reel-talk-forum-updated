@@ -1,5 +1,5 @@
 .category-bar {
-  margin: 40px auto;
+  margin: 50px 0 20px;
   width: 100%;
   overflow: hidden;
   grid-column: 1 / -1;
@@ -18,7 +18,7 @@
 .category-track-wrapper {
   display: flex;
   width: max-content;
-  animation: scrollCategories 5s linear infinite;
+  animation: scrollCategories 20s linear infinite;
   will-change: transform;
 }
 
@@ -38,22 +38,18 @@
   flex: 0 0 auto;
   white-space: nowrap;
   border: none;
-  border-radius: 999px;
+  /* border-radius: 999px; */
   padding: 10px 16px;
   background: #272626;
   color: #fff;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .category-chip:hover {
   background: #EBB866;
   color: #272626;
 }
-
-.category-track-wrapper { border: 2px solid red; }
-.category-track { border: 2px solid blue; }
-.category-chip { border: 1px solid yellow; }
 
 @keyframes scrollCategories {
   from {
@@ -73,20 +69,46 @@
 
 @media (max-width: 900px) {
   .category-bar {
-    margin: 50px 0 10px;
-    width: 100%;
-  }
-
-  .category-marquee,
-  .category-track-wrapper {
-    width: 100%;
-    max-width: 100%;
-    overflow: hidden;
+    margin: 20px 0 10px;
   }
 
   .category-track {
-    min-width: 100%;
     gap: 8px;
+  }
+
+  .category-chip {
+    padding: 9px 14px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 485px) {
+  .category-bar {
+    margin: 16px 0 10px;
+  }
+
+  .category-marquee {
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .category-track-wrapper {
+    display: flex;
+    width: max-content;
+  }
+
+  .category-track {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+    min-width: 100%;
     padding-right: 0;
+  }
+
+  .category-chip {
+    flex: 0 0 auto;
+    min-width: max-content;
+    padding: 8px 12px;
+    font-size: 12px;
   }
 }
