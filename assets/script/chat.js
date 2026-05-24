@@ -48,8 +48,11 @@ function initializeApp() {
     if (!token) {
         return;
     }
-    socket = new WebSocket(`ws://localhost:8999/ws?token=${encodeURIComponent(token)}`);
+    const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+    const wsUrl = `${protocol}${window.location.host}/ws?token=${encodeURIComponent(token)}`;
 
+    console.log("WebSocket URL:", wsUrl);
+    socket = new WebSocket(wsUrl);
     socket.onclose = () => {
         console.log("WebSocket closed. Reconnecting...");
         setTimeout(initializeApp, 3000); // Reconnect after 3 seconds
