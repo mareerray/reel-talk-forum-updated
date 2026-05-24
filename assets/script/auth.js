@@ -1,265 +1,277 @@
-const signUpButton = document.getElementById('signUp');
-const signInButton = document.getElementById('signIn');
-const container = document.getElementById('container');
+document.addEventListener('DOMContentLoaded', () => {
+  const signUpButton = document.getElementById('signUp');
+  const signInButton = document.getElementById('signIn');
+  const signUpFormContainer = document.getElementById('signUpFormContainer');
+  const logInFormContainer = document.getElementById('logInFormContainer');
 
-signUpButton.addEventListener('click', () => {
-	container.classList.add("right-panel-active");
-});
+  const nickNameRadio = document.getElementById("nickNameField");
+  const nickNameGroup = document.getElementById("nickNameGroup");
+  const emailRadio = document.getElementById("emailField");
+  const emailGroup = document.getElementById("emailGroup");
 
-signInButton.addEventListener('click', () => {
-	container.classList.remove("right-panel-active");
-});
+  const signUpForm = document.getElementById('signUpForm');
+  const logInForm = document.getElementById('logInForm');
 
-const nickNameRadio = document.getElementById("nickNameField");
-const nickNameGroup = document.getElementById("nickNameGroup");
-const emailRadio = document.getElementById("emailField");
-const emailGroup = document.getElementById("emailGroup");
-nickNameRadio.addEventListener("change", toggleFields);
-emailRadio.addEventListener("change", toggleFields);
+  function showSignIn() {
+    if (signUpFormContainer) signUpFormContainer.style.display = 'none';
+    if (logInFormContainer) logInFormContainer.style.display = 'flex';
+    const switchToSignup = document.getElementById('switchToSignup');
+    const switchToLogin = document.getElementById('switchToLogin');
+    if (switchToSignup) switchToSignup.style.display = 'block';
+    if (switchToLogin) switchToLogin.style.display = 'none';
+  }
 
-function toggleFields() {
-	if (nickNameRadio.checked) {
-		nickNameGroup.style.display = "flex";
-		emailGroup.style.display = "none";
-	} else if (emailRadio.checked) {
-		nickNameGroup.style.display = "none";
-		emailGroup.style.display = "flex";
-	}
-}
-document.querySelectorAll('.toggle-password').forEach(icon => {
-    icon.addEventListener('click', () => {
-        const targetId = icon.getAttribute('data-target');
-        const input = document.getElementById(targetId);
+  function showSignUp() {
+    if (logInFormContainer) logInFormContainer.style.display = 'none';
+    if (signUpFormContainer) signUpFormContainer.style.display = 'flex';
+    const switchToSignup = document.getElementById('switchToSignup');
+    const switchToLogin = document.getElementById('switchToLogin');
+    if (switchToSignup) switchToSignup.style.display = 'none';
+    if (switchToLogin) switchToLogin.style.display = 'block';
+  }
 
-        if (input.type === 'password') {
-        input.type = 'text';
-        icon.textContent = 'visibility_off';
+  if (signUpButton) signUpButton.addEventListener('click', showSignUp);
+  if (signInButton) signInButton.addEventListener('click', showSignIn);
+
+  function updateNavMenu() {
+    const navMenu = document.getElementById("nav-menu");
+    if (!navMenu) return;
+
+    if (sessionStorage.getItem("sessionToken")) {
+        const userNickname = sessionStorage.getItem("userNickname") || "User";
+        navMenu.innerHTML = `
+        <li><span class="user-display">User : ${userNickname}</span></li>
+        <li><a href="#" id="logout-button" aria-label="Log out" title="Log out">
+            <i class="material-icons" aria-hidden="true">logout</i>
+        </a></li>
+        `;
+
+        const logoutBtn = document.getElementById("logout-button");
+        if (logoutBtn) {
+        logoutBtn.addEventListener("click", handleLogout);
+        }
     } else {
-        input.type = 'password';
-        icon.textContent = 'visibility';
+        navMenu.innerHTML = `
+        <li><a href="#" id="login-link" aria-label="Log in" title="Log in">
+            <i class="material-icons" aria-hidden="true">login</i>
+        </a></li>
+        <li><a href="#" id="signup-link" aria-label="Sign up" title="Sign up">
+            <i class="material-icons" aria-hidden="true">person_add</i>
+        </a></li>
+        `;
+
+        const loginLink = document.getElementById("login-link");
+        const signupLink = document.getElementById("signup-link");
+        const container = document.getElementById("container");
+
+        if (loginLink) {
+            loginLink.addEventListener("click", function (event) {
+                event.preventDefault();
+                showSignIn();
+            });
+        }
+
+        if (signupLink) {
+            signupLink.addEventListener("click", function (event) {
+                event.preventDefault();
+                showSignUp();
+            });
+        }  
     }
-    });
-});
-// Get references to the forms
-const signUpForm = document.getElementById('signUpForm');
-const logInForm = document.getElementById('logInForm');
+  }
 
-// Sign Up Form Submission
-signUpForm.addEventListener('submit', function(e) {
-    e.preventDefault();
 
-    // Clear previous error messages
-    clearErrors();
+  function toggleFields() {
+    if (nickNameRadio && nickNameRadio.checked) {
+      if (nickNameGroup) nickNameGroup.style.display = "flex";
+      if (emailGroup) emailGroup.style.display = "none";
+    } else if (emailRadio && emailRadio.checked) {
+      if (nickNameGroup) nickNameGroup.style.display = "none";
+      if (emailGroup) emailGroup.style.display = "flex";
+    }
+  }
 
-    // Get form values
-    const firstName = document.getElementById('firstName').value.trim();
-    const lastName = document.getElementById('lastName').value.trim();
-    const nickName = document.getElementById('nickName').value.trim();
-    const gender = document.querySelector('input[name="gender"]:checked')?.value;
-    const age = document.getElementById('age').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('signUpPassword').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
+  if (nickNameRadio) nickNameRadio.addEventListener("change", toggleFields);
+  if (emailRadio) emailRadio.addEventListener("change", toggleFields);
 
-    // Client-side validation
-    let isValid = true;
+  if (signUpForm) {
+    signUpForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        clearErrors();
 
-    // Basic required field validation
-    if (!firstName || !nickName || !gender || !email || !password || !confirmPassword) {
+        const firstName = document.getElementById('firstName').value.trim();
+        const lastName = document.getElementById('lastName').value.trim();
+        const nickName = document.getElementById('nickName').value.trim();
+        const gender = document.querySelector('input[name="gender"]:checked')?.value;
+        const age = document.getElementById('age').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('signUpPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        let isValid = true;
+
+        if (!firstName || !nickName || !gender || !email || !password || !confirmPassword) {
         displayError('general', 'All required fields must be filled out');
         isValid = false;
-    }
-    
-    // Nickname validation (matches your Go validation)
-    if (nickName.length < 5 || nickName.length > 15) {
+        }
+
+        if (nickName.length < 5 || nickName.length > 15) {
         displayError('nickName', 'Nickname must be between 5 and 15 characters long');
         isValid = false;
-    }
+        }
 
-    // Check if nickname contains only valid characters
-    const validNicknameRegex = /^[a-zA-Z0-9_-]+$/;
-    if (!validNicknameRegex.test(nickName)) {
+        const validNicknameRegex = /^[a-zA-Z0-9_-]+$/;
+        if (!validNicknameRegex.test(nickName)) {
         displayError('nickName', 'Nickname can only contain letters, numbers, underscores, and dashes');
         isValid = false;
-    }
-    
-    // Email validation
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailRegex.test(email)) {
+        }
+
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(email)) {
         displayError('email', 'Please enter a valid email address');
         isValid = false;
-    }
+        }
 
-
-    // Age validation
-    const ageValue = parseInt(age, 10);
-    if (isNaN(ageValue) || ageValue < 13) {
+        const ageValue = parseInt(age, 10);
+        if (isNaN(ageValue) || ageValue < 13) {
         displayError('age', 'Age must be a number between 13 and 120');
         isValid = false;
-    }
-    // Password validation
-    if (password.length < 8) {
+        }
+
+        if (password.length < 8) {
         displayError('password', 'Password must be at least 8 characters long');
         isValid = false;
-    }
-    
-    // Check for lowercase, uppercase, digit, and special character
-    if (!/[a-z]/.test(password)) {
+        }
+
+        if (!/[a-z]/.test(password)) {
         displayError('password', 'Password must contain at least one lowercase letter');
         isValid = false;
-    }
-    
-    if (!/[A-Z]/.test(password)) {
+        }
+
+        if (!/[A-Z]/.test(password)) {
         displayError('password', 'Password must contain at least one uppercase letter');
         isValid = false;
-    }
-    
-    if (!/[0-9]/.test(password)) {
+        }
+
+        if (!/[0-9]/.test(password)) {
         displayError('password', 'Password must contain at least one digit');
         isValid = false;
-    }
-    
-    if (!/[@$!%*?&]/.test(password)) {
+        }
+
+        if (!/[@$!%*?&]/.test(password)) {
         displayError('password', 'Password must contain at least one special character (@, $, !, %, *, ?, &)');
         isValid = false;
-    }
-    
-    // Confirm password
-    if (password !== confirmPassword) {
+        }
+
+        if (password !== confirmPassword) {
         displayError('confirmPassword', 'Passwords do not match');
         isValid = false;
-    }
-    
-    if (isValid) {
-        // Prepare data for sending to server
+        }
+
+        if (!isValid) return;
+
         const userData = {
-            firstName: firstName,
-            lastName: lastName,
-            username: nickName,
-            gender: gender,
-            age: age,
-            email: email,
-            password: password
+        firstName,
+        lastName,
+        username: nickName,
+        gender,
+        age,
+        email,
+        password
         };
 
-        // Send data to server
         fetch('/api/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(userData)
-        })
-        .then((response) => {
-            if (!response.ok) {
-                return response.json().then((err) => {
-                    throw new Error(err.message || 'Registration failed');
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                // Switch to login view
-                signInButton.click();
-                signUpForm.reset();
-            } else {
-                if (data.field && data.message) {
-                    displayError(data.field, data.message);
-                } else {
-                    displayError('general', data.message || 'Registration failed. Please try again.');
-                }
-            }
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-            displayError(
-                'general',
-                error.message.includes('Failed to fetch')
-                    ? 'Network error. Please check your connection and try again.'
-                    : 'An error occurred. Please try again later.'
-            );
-        });
-    }
-});
-
-
-// Login Form Submission
-logInForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Clear previous error messages
-    clearErrors();
-    
-    // Get login option (nickname or email)
-    const loginOption = document.querySelector('input[name="login-option"]:checked').value;
-    
-    // Get form values based on login option
-    let identifier, password;
-    
-    if (loginOption === 'nickName') {
-        identifier = document.querySelector('#nickNameGroup input[name="nickName"]').value.trim();
-    } else {
-        identifier = document.querySelector('#emailGroup input[name="email"]').value.trim();
-    }
-    
-    password = document.querySelector('#logInForm input[name="password"]').value;
-    
-    // Basic validation
-    if (!identifier || !password) {
-        displayError('login-general', 'Invalid credentials. Please try again.');
-        return;
-    }
-    
-    // Prepare login data
-    const loginData = {
-        loginType: loginOption,
-        identifier: identifier,
-        password: password
-    };
-    
-    // Send login request to server
-    fetch('/api/login', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(loginData)
-    })
-    .then(response => {
-        if(!response.ok) {
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData)
+        })
+        .then(response => {
+        if (!response.ok) {
             return response.json().then(err => {
-                throw new Error(err.message || 'Invalid credentials. Please try again.');
+            throw new Error(err.message || 'Registration failed');
             });
         }
         return response.json();
-    })
-    .then(data => {
+        })
+        .then(data => {
         if (data.success) {
-            // Store the session token in sessionStorage
+            signInButton?.click();
+            signUpForm.reset();
+        } else {
+            displayError(data.field || 'general', data.message || 'Registration failed. Please try again.');
+        }
+        })
+        .catch(error => {
+        console.error('Error:', error);
+        displayError('general',
+            error.message.includes('Failed to fetch')
+            ? 'Network error. Please check your connection and try again.'
+            : 'An error occurred. Please try again later.'
+        );
+        });
+    });
+ }
+    if (logInForm) {
+    logInForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        clearErrors();
+
+        const loginOption = document.querySelector('input[name="login-option"]:checked')?.value;
+        let identifier, password;
+
+        if (loginOption === 'nickName') {
+        identifier = document.querySelector('#nickNameGroup input[name="nickName"]')?.value.trim();
+        } else {
+        identifier = document.querySelector('#emailGroup input[name="email"]')?.value.trim();
+        }
+
+        password = document.querySelector('#logInForm input[name="password"]')?.value;
+
+        if (!identifier || !password) {
+        displayError('login-general', 'Invalid credentials. Please try again.');
+        return;
+        }
+
+        const loginData = { loginType: loginOption, identifier, password };
+
+        fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(loginData)
+        })
+        .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => {
+            throw new Error(err.message || 'Invalid credentials. Please try again.');
+            });
+        }
+        return response.json();
+        })
+        .then(data => {
+        if (data.success) {
             sessionStorage.setItem('sessionToken', data.token);
-            sessionStorage.setItem("userNickname", data.nickname || data.email); 
-    
-            // Update the navigation menu
-            updateNavMenu(); 
-    
-            // Redirect to homepage
-            redirectToHomepage();      
-            
-            // Initialize WebSocket connection
+            sessionStorage.setItem('userNickname', data.nickname || data.email);
+            updateNavMenu();
+            redirectToHomepage();
             if (typeof initializeApp === "function") initializeApp();
         } else {
             displayError('login-general', data.message || 'Invalid credentials. Please try again.');
         }
-    })
-    .catch(error => {
+        })
+        .catch(error => {
         console.error('Error:', error);
-        displayError(
-            'login-general',
+        displayError('login-general',
             error.message.includes('Failed to fetch')
-                ? 'Network error. Please check your connection and try again.'
-                : 'Invalid credentials. Please try again.'
+            ? 'Network error. Please check your connection and try again.'
+            : 'Invalid credentials. Please try again.'
         );
+        });
     });
+    }
+  showSignIn();
+  updateNavMenu();
 });
+
 
 // Function to redirect to homepage
 function redirectToHomepage() {
@@ -310,10 +322,6 @@ function fetchUserProfile() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    updateNavMenu(); // Populate navigation menu based on user state
-});
-
-document.addEventListener("DOMContentLoaded", () => {
     const sessionToken = sessionStorage.getItem("sessionToken");
 
     if (sessionToken) {
@@ -333,43 +341,6 @@ document.addEventListener("DOMContentLoaded", () => {
     updateNavMenu(); // This ensures nav menu updates on page reload
 });
 
-
-function updateNavMenu() {
-    const navMenu = document.getElementById("nav-menu");
-
-    if (sessionStorage.getItem("sessionToken")) {
-        const userNickname = sessionStorage.getItem("userNickname") || "User";
-        navMenu.innerHTML = `
-            <li><span class="user-display">User : ${userNickname}</span></li>
-            <li><a href="#" id="logout-button">[Logout]</a></li>
-        `;
-
-        const logoutBtn = document.getElementById("logout-button");
-        logoutBtn.addEventListener("click", handleLogout);
-    } else {
-        navMenu.innerHTML = `
-            <li><a href="#" id="login-link">[Login]</a></li>
-            <li><a href="#" id="signup-link">[Sign Up]</a></li>
-        `;
-
-        const loginLink = document.getElementById("login-link");
-        const signupLink = document.getElementById("signup-link");
-        const container = document.getElementById('container');
-
-        if (loginLink) {
-            loginLink.addEventListener("click", function(event) {
-                event.preventDefault();
-                container.classList.remove("right-panel-active");
-            });
-        }
-        if (signupLink) {
-            signupLink.addEventListener("click", function(event) {
-                event.preventDefault();
-                container.classList.add("right-panel-active");
-            });
-        }
-    }
-}
 
 function handleLogout(event) {
     event.preventDefault();

@@ -12,9 +12,13 @@
     <link rel="stylesheet" href="/assets/css/main.css">
     <link rel="stylesheet" href="/assets/css/auth.css">
     <link rel="stylesheet" href="/assets/css/chat.css">
+    <link rel="stylesheet" href="/assets/css/inline-styles.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons&display=block">    
     <!-- Core JavaScript -->
     <script src="/assets/script/auth.js" defer></script>
     <script src="/assets/script/categories.js" defer></script>
@@ -44,7 +48,7 @@
 
     <!------Main page----------------------------------------------------------------------------------------->
 
-    <div id="mainView" style="display: none;">
+    <div id="mainView" class="main-view-hidden">
         <div class="main-container">
             <!-- Categories Sidebar -->
             <div class="category-bar">
@@ -144,7 +148,7 @@
                         <!-- Messages display here -->
                         </div>
                     </div>
-                    <div id="typing-indicator" style="display:none"></div>
+                    <div id="typing-indicator" class="typing-indicator-hidden"></div>
                     <div class="message-input">
                         <input type="text" id="messageInput" placeholder="Type a message...">
                         <button id="sendButton">Send</button>
@@ -155,24 +159,63 @@
     </div>
     <!------Login & Sign up---------------------------------------------------------------------------------------->
 
-    <div id="authView"  style="display: block;">
+    <div id="authView" class="auth-view-visible">
         <div class="container" id="container">
+
+            <!--Login section-->
+            <div class="form-container sign-in-container form-container-flex" id="logInFormContainer">
+                <form id= "logInForm" action="#">
+                    <h1>Login</h1>
+                    <span>Enter your email or nickname</span>
+                        <!-- Radio buttons for Email or Nickname -->
+                        <div class="radio-group">
+                                <input type="radio" name="login-option" value="nickName" id="nickNameField" required checked/>
+                                <label for="nickNameField">Nickname:</label>
+                                <input type="radio" name="login-option" value="email" id="emailField" required />
+                                <label for="emailField">Email:</label>
+                        </div>
+                        <div class="input-group input-group-flex" id="nickNameGroup">
+                            <label>Nickname:</label>
+                            <input type="text" name="nickName" placeholder="Nickname"/>
+                        </div>
+                        <div class="input-group input-group-hidden" id="emailGroup">
+                            <label>Email:</label>
+                            <input type="email" name="email" placeholder="Email"/>
+                        </div>
+                        <div class="input-group">
+                            <label for="Password">Password:</label>
+                            <div class="password-wrapper">
+                                <input type="password" name="password" id="signInPassword" placeholder="Password"/>
+                                <span class="material-icons toggle-password" data-target="signInPassword">visibility</span>
+                            </div>
+                        </div>
+                    <button type="submit">Log In</button>
+                </form>
+            </div>
+            <!-- switch under login form -->
+            <div class="switch-panel" id="switchToSignup">
+                <h1>Don't have an account?</h1>
+                <p>Enter your personal details and start chatting.</p>
+                <button type="button" class="ghost" id="signUp">Sign Up</button>
+            </div>
+
+
             <!--Sign up section-->
-            <div class="form-container sign-up-container" id=" signUpFormContainer">
+            <div class="form-container sign-up-container form-container-hidden" id="signUpFormContainer">
                 <form id="signUpForm"action="#">
                     <h1>Create Account</h1>
                     <span>Sign up to start chatting</span>
                     <div class="input-group">
                         <label for = "First Name">FirstName:</label>
-                        <input type="text" name="firstName"  id="firstName" required minlength="3"/>
+                        <input type="text" name="firstName"  id="firstName" placeholder="First Name" required minlength="3"/>
                     </div>
                     <div class="input-group">
                         <label for = "Last Name">LastName:</label>
-                        <input type="text" name="lastName"  id="lastName" minlength="2" />
+                        <input type="text" name="lastName"  id="lastName" minlength="2" placeholder="Last Name" title="Last Name" />
                     </div>
                     <div class="input-group">
                         <label for = "Nick Name">NickName:</label>
-                        <input type="text" name="nickName"  id="nickName" minlength="3"/>
+                        <input type="text" name="nickName" id="nickName" minlength="3" placeholder="Nick Name" title="Nick Name" />
                     </div>
                     <div class="radio-group">
                         <label class="label-gender">Gender:</label>
@@ -185,12 +228,12 @@
                     </div>
                     <div class="input-group">
                         <label for="Age">Age:</label>
-                        <input type="number" name="age" id="age" min="1" required />
+                        <input type="number" name="age" id="age" min="1" required placeholder="Age" title="Age" />
                     </div>
                     
                     <div class="input-group  input-email">
                         <label for = "Email">Email:</label>
-                        <input type="email" name="email"  id="email"  />
+                        <input type="email" name="email"  id="email" placeholder="Email" title="Email" />
                     </div>
                     <div class="input-group">
                         <label for="signUpPassword">Password:</label>
@@ -207,60 +250,19 @@
                             <span class="material-icons toggle-password" data-target="confirmPassword">visibility</span>
                         </div>
                     </div>
-                    <button>Sign Up</button>
+                    <button type="submit">Sign Up</button>
                 </form>
             </div>
-
-            <!--Login section-->
-            <div class="form-container sign-in-container" id="logInFormContainer">
-                <form id= "logInForm" action="#">
-                    <h1>Login</h1>
-                    <span>Enter your email or nickname</span>
-                        <!-- Radio buttons for Email or Nickname -->
-                        <div class="radio-group">
-                                <input type="radio" name="login-option" value="nickName" id="nickNameField" required checked/>
-                                <label for="nickNameField">Nickname:</label>
-                                <input type="radio" name="login-option" value="email" id="emailField" required />
-                                <label for="emailField">Email:</label>
-                        </div>
-                        <div class="input-group" style="display: flex;" id="nickNameGroup">
-                            <label>Nickname:</label>
-                            <input type="text" name="nickName" placeholder="Nickname"/>
-                        </div>
-                        <div class="input-group" style="display: none;" id="emailGroup">
-                            <label>Email:</label>
-                            <input type="email" name="email" placeholder="Email"/>
-                        </div>
-                        <div class="input-group">
-                            <label for="Password">Password:</label>
-                            <div class="password-wrapper">
-                                <input type="password" name="password" id="signInPassword" />
-                                <span class="material-icons toggle-password" data-target="signInPassword">visibility</span>
-                            </div>
-                        </div>
-                    <button>Log In</button>
-                </form>
-            </div>
-
-            <!--Overlay animation to switch between login and signup pages-->
-            <div class="overlay-container">
-                <div class="overlay">
-                    <div class="overlay-panel overlay-left">
-                        <h1>Welcome Back!</h1>
-                        <p>To keep connected with us please login with your personal info</p>
-                        <button class="ghost" id="signIn">Log In</button>
-                    </div>
-                    <div class="overlay-panel overlay-right">
-                        <h1>Don't have an account?</h1>
-                        <p>Enter your personal details and start chatting</p>
-                        <button class="ghost" id="signUp">Sign Up</button>
-                    </div>
-                </div>
+            <!-- switch under signup form -->
+            <div class="switch-panel" id="switchToLogin">
+                <h1>Welcome Back!</h1>
+                <p>To keep connected with us please login with your personal info.</p>
+                <button type="button" class="ghost" id="signIn">Log In</button>
             </div>
         </div>
     </div>
     
-    <div id="userTooltip" class="user-tooltip" style="display: none; position: absolute;"></div>
+    <div id="userTooltip" class="user-tooltip user-tooltip-hidden"></div>
     <!------Footer----------------------------------------------------------------------------------------->
 
     <!-- Footer Section -->
@@ -270,8 +272,8 @@
             <nav>
                 <ul>
                     <li>Created by:</li>
-                    <li><a href="https://github.com/mareerray" target="_blank"> Mayuree 🍿 </a></li>
-                    <li><a href="https://github.com/fatemekh78" target="_blank"> Fateme 🎞️ </a></li>
+                        <li><a href="https://github.com/mareerray" target="_blank" rel="noopener"> Mayuree 🍿 </a></li>
+                    <li><a href="https://github.com/fatemekh78" target="_blank" rel="noopener"> Fateme 🎞️ </a></li>
 
                 </ul>
             </nav>

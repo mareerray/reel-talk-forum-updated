@@ -31,6 +31,7 @@ html{
 body.main-view .bg-container {
     display: block; /* Show background for main view */
     padding-bottom: 40px;
+    min-height: 100vh;
 }
 
 #mainView {
