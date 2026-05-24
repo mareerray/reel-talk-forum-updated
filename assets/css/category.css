@@ -68,3 +68,23 @@
     font-size: 13px;
   }
 }
+
+@media (max-width: 900px) {
+  .category-bar {
+    margin: 20px 0 10px;
+    width: 100%;
+  }
+
+  .category-marquee,
+  .category-track-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .category-track {
+    min-width: 100%;
+    gap: 8px;
+    padding-right: 0;
+  }
+}
