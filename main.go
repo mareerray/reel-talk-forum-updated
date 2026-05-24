@@ -6,8 +6,8 @@ import (
 	"real-time-forum/handler"
 	"real-time-forum/utils"
 	"text/template"
+	"os"
 
-	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
@@ -68,8 +68,16 @@ func main() {
 		}
 	})
 
-	log.Println("Server starting at http://localhost:8999")
-	if err := http.ListenAndServe(":8999", nil); err != nil {
+	port := os.Getenv("PORT")
+	if port == "" { // use Render's PORT automatically
+		port = "8999" // default to 8999 if not set
+	}
+	log.Println("Server starting on port " + port)
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		log.Fatalf("Error starting server: %v", err)
 	}
+	// log.Println("Server starting at http://localhost:8999")
+	// if err := http.ListenAndServe(":8999", nil); err != nil {
+	// 	log.Fatalf("Error starting server: %v", err)
+	// }
 }

@@ -24,7 +24,7 @@ func CheckUserLoggedIn(r *http.Request) (bool, int) {
 	query := `
     SELECT user_id, session_expiry 
     FROM sessions 
-    WHERE session_token = ? 
+    WHERE session_token = $1
     AND session_token = (
         SELECT session_token 
         FROM sessions AS s2 
@@ -74,14 +74,14 @@ func InsertSession(session *model.Session) (*model.Session, error) {
 		return &model.Session{}, err
 	}
 
-	updateQuery := `UPDATE sessions SET expires_at = CURRENT_TIMESTAMP WHERE user_id = ? AND expires_at > CURRENT_TIMESTAMP;`
+	updateQuery := `UPDATE sessions SET expires_at = CURRENT_TIMESTAMP WHERE user_id = $1 AND expires_at > CURRENT_TIMESTAMP;`
 	_, updateErr := tx.Exec(updateQuery, session.UserId)
 	if updateErr != nil {
 		tx.Rollback()
 		return nil, updateErr
 	}
 
-	insertQuery := `INSERT INTO sessions (session_token, user_id, expires_at) VALUES (?, ?, ?);`
+	insertQuery := `INSERT INTO sessions (session_token, user_id, expires_at) VALUES ($1, $2, $3);`
 	_, insertErr := tx.Exec(insertQuery, session.SessionToken, session.UserId, session.ExpiresAt)
 	if insertErr != nil {
 		tx.Rollback()
@@ -105,7 +105,7 @@ func InsertSession(session *model.Session) (*model.Session, error) {
 
 func CreateSession(w http.ResponseWriter, userID int) error {
 	// First, invalidate any existing session for this user
-	_, err := DB.Exec("DELETE FROM sessions WHERE user_id = ?", userID)
+	_, err := DB.Exec("DELETE FROM sessions WHERE user_id = $1", userID)
 	if err != nil {
 		log.Printf("Error deleting old sessions: %v", err)
 	}
@@ -117,7 +117,7 @@ func CreateSession(w http.ResponseWriter, userID int) error {
 	query := `
     INSERT INTO sessions 
     (user_id, session_token, session_expiry) 
-    VALUES (?, ?, ?)
+    VALUES ($1, $2, $3)
 	`
 
 	_, err = DB.Exec(query, userID, token, cookie.Expires)
@@ -132,7 +132,7 @@ func CreateSession(w http.ResponseWriter, userID int) error {
 // -- Non-Global Functions : Only happens in this package server -- //
 
 func DeleteSession(token string) {
-	_, err := DB.Exec("DELETE FROM sessions WHERE session_token = ?", token)
+	_, err := DB.Exec("DELETE FROM sessions WHERE session_token = $1", token)
 	if err != nil {
 		log.Printf("Error deleting session: %v", err)
 	}
@@ -176,7 +176,7 @@ func ValidateSessionHandler(w http.ResponseWriter, r *http.Request) {
         SELECT EXISTS(
             SELECT 1 
             FROM sessions 
-            WHERE session_token = ? 
+            WHERE session_token = $1 
             AND is_active = true 
             AND session_expiry > datetime('now')
         )`, token).Scan(&isValid)
@@ -198,7 +198,7 @@ func ValidateSessionHandler(w http.ResponseWriter, r *http.Request) {
 	err = DB.QueryRow(`
         SELECT user_id 
         FROM sessions 
-        WHERE session_token = ?`, token).Scan(&userID)
+        WHERE session_token = $1`, token).Scan(&userID)
 
 	if err != nil {
 		http.Error(w, "Database error", http.StatusInternalServerError)

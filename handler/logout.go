@@ -27,7 +27,7 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Delete session from sessions table
-	_, err = tx.Exec("DELETE FROM sessions WHERE session_token = ?", cookie.Value)
+	_, err = tx.Exec("DELETE FROM sessions WHERE session_token = $1", cookie.Value)
 	if err != nil {
 		tx.Rollback()
 		log.Printf("Failed to delete session: %v", err)
@@ -37,7 +37,7 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Clear session from users table
 	_, err = tx.Exec(
-		"UPDATE users SET session_token = NULL, session_expiry = NULL WHERE session_token = ?",
+		"UPDATE users SET session_token = NULL, session_expiry = NULL WHERE session_token = $1",
 		cookie.Value,
 	)
 	if err != nil {

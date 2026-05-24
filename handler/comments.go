@@ -29,7 +29,7 @@ func PostCommentHandler(w http.ResponseWriter, r *http.Request) {
 		SELECT s.user_id, u.nickname 
         FROM sessions s
         JOIN users u ON s.user_id = u.id
-        WHERE s.session_token = ? 
+        WHERE s.session_token = $1 
         AND s.is_active = true 
         AND s.session_expiry > datetime('now')`, token).Scan(&userID, &nickname)
 
@@ -62,7 +62,7 @@ func PostCommentHandler(w http.ResponseWriter, r *http.Request) {
 	// Execute SQL with the userID from the session
 	_, err = DB.Exec(`INSERT INTO comments 
         (user_id, user_name, post_id, content) 
-        VALUES (?, ?, ?, ?)`,
+        VALUES ($1, $2, $3, $4)`,
 		userID, nickname, comment.PostID, comment.Content)
 
 	if err != nil {
@@ -88,7 +88,7 @@ func GetCommentsHandler(w http.ResponseWriter, r *http.Request) {
 	rows, err := DB.Query(`
         SELECT user_name, content, created_at 
         FROM comments 
-        WHERE post_id = ? 
+        WHERE post_id = $1 
         ORDER BY created_at DESC`, id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

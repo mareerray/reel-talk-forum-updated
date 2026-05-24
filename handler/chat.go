@@ -25,19 +25,22 @@ func InsertChat(user_id_1, user_id_2 int) (int, error) {
 		return 0, err
 	}
 
-	res, insertErr := DB.Exec(
-		`INSERT INTO chats (uuid, user_id_1, user_id_2) VALUES (?, ?, ?)`,
-		uuid, user_id_1, user_id_2,
-	)
-	if insertErr != nil {
-		if sqliteErr, ok := insertErr.(interface{ Error() string }); ok &&
-			strings.Contains(sqliteErr.Error(), "UNIQUE constraint failed") {
-			return FindChatIDbyUserIDS(user_id_1, user_id_2)
-		}
-		return 0, insertErr
-	}
-	chatID, err := res.LastInsertId()
-	return int(chatID), err
+	var chatID int
+    err = DB.QueryRow(
+        `INSERT INTO chats (uuid, user_id_1, user_id_2)
+			VALUES ($1, $2, $3)
+			RETURNING id`,
+        uuid, user_id_1, user_id_2,
+    ).Scan(&chatID)
+
+    if err != nil {
+        if strings.Contains(err.Error(), "duplicate key value") {
+            return FindChatIDbyUserIDS(user_id_1, user_id_2)
+        }
+        return 0, err
+    }
+
+    return chatID, nil
 }
 
 func FindChatIDbyUserIDS(user_id_1, user_id_2 int) (int, error) {
@@ -47,8 +50,8 @@ func FindChatIDbyUserIDS(user_id_1, user_id_2 int) (int, error) {
 	var chatID int
 	err := DB.QueryRow(`
 		SELECT id FROM chats 
-		WHERE (user_id_1 = ? AND user_id_2 = ?) 
-		OR (user_id_1 = ? AND user_id_2 = ?)`,
+		WHERE (user_id_1 = $1 AND user_id_2 = $2) 
+		OR (user_id_1 = $3 AND user_id_2 = $4)`,
 		user_id_1, user_id_2, user_id_2, user_id_1).Scan(&chatID)
 
 	if err != nil {
@@ -76,7 +79,7 @@ func InsertMessage(content string, user_id_from int, chatID int) error {
 	}
 
 	insertQuery := `INSERT INTO messages (chat_id, user_id_from, content, created_at) 
-                VALUES (?, ?, ?, CURRENT_TIMESTAMP)`;
+                VALUES ($1, $2, $3, CURRENT_TIMESTAMP)`;
 	_, insertErr := tx.Exec(insertQuery, chatID, user_id_from, content)
 	if insertErr != nil {
 		fmt.Println("Insert error in InsertMessage", insertErr)
@@ -96,10 +99,10 @@ func UpdateChat(chatID int, userID int, tx *sql.Tx) (int, error) {
 	query := `
 		UPDATE chats
 		SET updated_at = CURRENT_TIMESTAMP,
-			updated_by = ?
-		WHERE id = ?;
+			updated_by = $2
+		WHERE id = $1;
 	`
-	result, err := tx.Exec(query, userID, chatID)
+	result, err := tx.Exec(query, chatID, userID)
 	if err != nil {
 		fmt.Println("Error, arguments:", chatID, userID)
 		return 0, err
@@ -136,18 +139,20 @@ func ReadAllUsers(userID int) ([]model.ChatUser, []model.ChatUser, error) {
             SELECT 1 FROM messages m
             WHERE m.chat_id = c.id
             AND m.user_id_from = u.id
-            AND m.user_id_from != ?
-            AND m.id > IFNULL(
-                (SELECT MAX(m2.id) FROM messages m2
-                WHERE m2.chat_id = c.id
-                AND m2.user_id_from = ?), 0)
+            AND m.user_id_from != $1
+            AND m.id > COALESCE(
+				(SELECT MAX(m2.id) FROM messages m2
+				WHERE m2.chat_id = c.id
+				AND m2.user_id_from = $2), 0)
         )) AS has_unread
 	FROM users u
 	LEFT JOIN chats c 
-		ON (u.id = c.user_id_1 OR u.id = c.user_id_2)
-		AND (c.user_id_1 = ? AND c.user_id_2 = u.id) 
-		OR (c.user_id_2 = ? AND c.user_id_1 = u.id)
-	WHERE u.id != ?
+		ON (
+			(c.user_id_1 = $3 AND c.user_id_2 = u.id)
+			OR
+			(c.user_id_2 = $4 AND c.user_id_1 = u.id)
+		)	
+		WHERE u.id != $5
 	ORDER BY last_activity DESC;
     `, userID, userID, userID, userID, userID)
 
@@ -223,12 +228,12 @@ func CheckUnreadMessages(userID int, senderID int) (bool, error) {
     query := `
     SELECT EXISTS(
         SELECT 1 FROM messages m
-        WHERE m.chat_id = ?
-        AND m.user_id_from = ?
-        AND m.created_at > IFNULL(
-            (SELECT read_at FROM message_read_receipts 
-				WHERE chat_id = ? AND user_id = ?), 
-            '1970-01-01')
+        WHERE m.chat_id = $1
+		AND m.user_id_from = $2
+        AND m.created_at > COALESCE(
+			(SELECT read_at FROM message_read_receipts
+			WHERE chat_id = $3 AND user_id = $4), 
+            TIMESTAMPTZ '1970-01-01 00:00:00+00')
     ) AS has_unread
     `
     
@@ -259,7 +264,7 @@ func ClearUnreadMessages(userID int, senderID int) error {
     // SQLite syntax for UPSERT
     _, err = DB.Exec(`
         INSERT INTO message_read_receipts (chat_id, user_id, read_at)
-        VALUES (?, ?, CURRENT_TIMESTAMP)
+        VALUES ($1, $2, CURRENT_TIMESTAMP)
         ON CONFLICT(chat_id, user_id) 
         DO UPDATE SET read_at = CURRENT_TIMESTAMP
     `, chatID, userID)
@@ -288,9 +293,9 @@ func ReadAllMessages(chatID int, numberOfMessages int, userID int, offset int) (
         FROM messages m
         INNER JOIN users u 
             ON m.user_id_from = u.id
-        WHERE m.chat_id = ?
+        WHERE m.chat_id = $1
         ORDER BY m.id DESC
-        LIMIT ? OFFSET ?;
+        LIMIT $2 OFFSET $3;
     `, chatID, numberOfMessages, offset)
 
 	if selectError != nil {

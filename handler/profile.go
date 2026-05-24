@@ -37,7 +37,7 @@ func GetUserProfile(w http.ResponseWriter, r *http.Request) {
 		}
 
 		query := `SELECT nickname, first_name, last_name, gender, age, email 
-            FROM users WHERE id = ?`
+            FROM users WHERE id = $1`
 
 		err := DB.QueryRow(query, userID).Scan(
 			&user.Nickname,
@@ -96,7 +96,7 @@ func InsertUser(user *User) (int, error) {
 
 	var existingEmail string
 	var existingUsername string
-	emailCheckQuery := `SELECT email, nickname FROM users WHERE email = ? OR nickname = ? LIMIT 1;`
+	emailCheckQuery := `SELECT email, nickname FROM users WHERE email = $1 OR nickname = $2 LIMIT 1;`
 	err := DB.QueryRow(emailCheckQuery, user.Email, user.Username).Scan(&existingEmail, &existingUsername)
 	if err == nil {
 		if existingEmail == user.Email {
@@ -107,10 +107,8 @@ func InsertUser(user *User) (int, error) {
 		}
 	}
 
-	//insertQuery := `INSERT INTO users (uuid, name, username, email, password) VALUES (?, ?, ?, ?, ?);`
-	//result, insertErr := db.Exec(insertQuery, user.UUID, user.Username, user.Username, user.Email, user.Password)
 
-	insertQuery := `INSERT INTO users (uuid, username, email, password, age, gender, firstname, lastname) VALUES (?, ?, ?, ?, ?, ?, ?, ?);`
+	insertQuery := `INSERT INTO users (uuid, username, email, password, age, gender, firstname, lastname) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`
 	result, insertErr := DB.Exec(insertQuery, user.UUID, user.Username, user.Email, user.Password, user.Age, user.Gender, user.FirstName, user.LastName)
 	if insertErr != nil {
 		// Check if the error is a SQLite constraint violation (duplicate entry)
@@ -138,7 +136,7 @@ func AuthenticateUser(input, password string) (int, error) {
 	// Query to retrieve the hashed password stored in the database for the given username
 	var userID int
 	var storedHashedPassword string
-	err := DB.QueryRow("SELECT id, password FROM users WHERE username = ? OR email = ?", input, input).Scan(&userID, &storedHashedPassword)
+	err := DB.QueryRow("SELECT id, password FROM users WHERE username = $1 OR email = $2", input, input).Scan(&userID, &storedHashedPassword)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			// Username not found
@@ -164,7 +162,7 @@ func FindUsernameByID(ID int) (string, error) {
 		SELECT
 			username
 		FROM users
-			WHERE id = ?;
+			WHERE id = $1;
 	`
 	idRow, selectError := DB.Query(selectQuery, ID)
 	if selectError != nil {
@@ -182,44 +180,19 @@ func FindUsernameByID(ID int) (string, error) {
 }
 func FindUsername(userUUID string) (string, error) {
     var nickname string
-    err := DB.QueryRow("SELECT nickname FROM users WHERE uuid = ?", userUUID).Scan(&nickname)
+    err := DB.QueryRow("SELECT nickname FROM users WHERE uuid = $1", userUUID).Scan(&nickname)
     if err != nil {
         log.Printf("[ERROR] FindUsername failed for UUID %s: %v", userUUID, err)
     }
     return nickname, err
 }
 
-// func FindUsername(userUUID string) (string, error) {
-
-// 	var nickname string
-
-// 	selectQuery := `
-// 		SELECT
-// 			nickname
-// 		FROM users
-// 			WHERE uuid = ?;
-// 	`
-// 	idRow, selectError := DB.Query(selectQuery, userUUID)
-// 	if selectError != nil {
-// 		return "", selectError
-// 	}
-
-
-// 	for idRow.Next() {
-// 		if err := idRow.Scan(&nickname); err != nil {
-// 			fmt.Printf("Failed to scan row: %v\n", err)
-// 		}
-// 	}
-
-// 	return nickname, nil
-// }
-
 func UpdateOnlineTime(UserID int) error {
 
 	updateQuery := `UPDATE users
 	SET 
 		last_activity = CURRENT_TIMESTAMP
-	WHERE id = ?;`
+	WHERE id = $1;`
 	_, updateErr := DB.Exec(updateQuery, UserID)
 	if updateErr != nil {
 		fmt.Println(updateErr)
@@ -230,29 +203,7 @@ func UpdateOnlineTime(UserID int) error {
 
 func FindUserByUUID(UUID string) (int, error) {
 	var id int
-	err := DB.QueryRow("SELECT id FROM users WHERE uuid = ?", UUID).Scan(&id)
+	err := DB.QueryRow("SELECT id FROM users WHERE uuid = $1", UUID).Scan(&id)
 	return id, err
-  }
-  
-// func FindUserByUUID(UUID string) (int, error) {
+}
 
-// 	selectQuery := `
-// 		SELECT
-// 			id
-// 		FROM users
-// 			WHERE uuid = ?;
-// 	`
-// 	idRow, selectError := DB.Query(selectQuery, UUID)
-// 	if selectError != nil {
-// 		return -1, selectError
-// 	}
-
-// 	var id int
-// 	for idRow.Next() {
-// 		if err := idRow.Scan(&id); err != nil {
-// 			fmt.Printf("Failed to scan row: %v\n", err)
-// 		}
-// 	}
-
-// 	return id, nil
-// }

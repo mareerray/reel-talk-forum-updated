@@ -6,32 +6,27 @@ import (
 	"log"
 	"os"
 	"strings"
+
+	_ "github.com/lib/pq"
 )
 
 var DB *sql.DB
 
 func OpenDBConnection() *sql.DB {
-	db, err := sql.Open("sqlite3", "reel-talk.db")
-	if err != nil {
-		log.Fatal(err)
+	connStr := os.Getenv("DATABASE_URL")
+	if connStr == "" {
+		log.Fatal("DATABASE_URL environment variable is not set")
 	}
 
-	// Enable foreign key constraints
-	_, err = db.Exec("PRAGMA foreign_keys = ON;")
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		log.Fatal("Failed to enable foreign key constraints:", err)
-	}
-	// Enable foreign key constraints
-	_, err = db.Exec("PRAGMA journal_mode=WAL;")
-	if err != nil {
-		log.Fatal("Failed to enable foreign key constraints:", err)
+		log.Fatal("Failed to open database:", err)
 	}
 
 	return db
 }
 
 func ExecuteSQLFile(sqlFilePath string) error {
-
 	sqlBytes, err := os.ReadFile(sqlFilePath)
 	if err != nil {
 		return fmt.Errorf("failed to read SQL file: %v", err)

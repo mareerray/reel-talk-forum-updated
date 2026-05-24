@@ -12,7 +12,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// RegisterHandler handles user registration requests
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -60,7 +59,6 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Generate UUID for user
 	userUUID, err := utils.GenerateUuid()
 	if err != nil {
 		log.Printf("UUID generation failed: %v", err)
@@ -69,7 +67,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, err = DB.Exec(
-		"INSERT INTO users (first_name, last_name, nickname, gender, age, email, password_hash, uuid) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+		"INSERT INTO users (first_name, last_name, nickname, gender, age, email, password_hash, uuid) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
 		req.FirstName, req.LastName, req.Username, req.Gender, req.Age, req.Email, string(hashedPassword), userUUID,
 	)
 	if err != nil {
@@ -85,7 +83,6 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// LoginHandler handles user login requests
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -113,9 +110,9 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var query string
 
 	if req.LoginType == "email" {
-		query = "SELECT id, nickname, password_hash, uuid FROM users WHERE email = ?"
+		query = "SELECT id, nickname, password_hash, uuid FROM users WHERE email = $1"
 	} else {
-		query = "SELECT id, nickname, password_hash, uuid FROM users WHERE nickname = ?"
+		query = "SELECT id, nickname, password_hash, uuid FROM users WHERE nickname = $1"
 	}
 
 	err := DB.QueryRow(query, req.Identifier).Scan(&userID, &nickname, &hashedPassword, &userUUID)
@@ -139,9 +136,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	expiresAt := time.Now().Add(24 * time.Hour)
-	expiryStr := expiresAt.Format(time.RFC3339)
 
-	// Begin transaction
 	tx, err := DB.Begin()
 	if err != nil {
 		log.Printf("Failed to begin transaction: %v", err)
@@ -149,8 +144,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Delete existing sessions for this user
-	_, delErr := tx.Exec("DELETE FROM sessions WHERE user_id = ?", userID)
+	_, delErr := tx.Exec("DELETE FROM sessions WHERE user_id = $1", userID)
 	if delErr != nil {
 		tx.Rollback()
 		log.Printf("Failed to clear existing sessions: %v", delErr)
@@ -158,10 +152,9 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Insert into sessions table
 	_, err = tx.Exec(
-		"INSERT INTO sessions (id, user_id, is_active, session_token, session_expiry) VALUES (?, ?, ?, ?, ?)",
-		sessionToken, userID, true, sessionToken, expiryStr,
+		"INSERT INTO sessions (id, user_id, is_active, session_token, session_expiry) VALUES ($1, $2, $3, $4, $5)",
+		sessionToken, userID, true, sessionToken, expiresAt,
 	)
 	if err != nil {
 		tx.Rollback()
@@ -170,21 +163,19 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Commit transaction
 	if err = tx.Commit(); err != nil {
 		log.Printf("Failed to commit transaction: %v", err)
 		respondWithError(w, "Error creating session", "login-general", http.StatusInternalServerError)
 		return
 	}
 
-	// Set session cookie
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_token",
 		Value:    sessionToken,
 		Path:     "/",
-		MaxAge:   86400, // 24h
+		MaxAge:   86400,
 		HttpOnly: true,
-		Secure:   false, // Set to true if using HTTPS
+		Secure:   false,
 		SameSite: http.SameSiteLaxMode,
 	})
 
@@ -194,24 +185,11 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		Message: "Login successful",
 		Token:   sessionToken,
 	})
-	
-	// After successful SELECT query:
-	log.Printf(
-		"Login success - UserID: %d, Nickname: %s, UUID: %s", 
-		userID, 
-		nickname, 
-		userUUID,
-	)
 
-	// After session creation:
-	log.Printf(
-		"Session created - Token: %s → UserID: %d", 
-		sessionToken, 
-		userID,
-	)
+	log.Printf("Login success - UserID: %d, Nickname: %s, UUID: %s", userID, nickname, userUUID)
+	log.Printf("Session created - Token: %s → UserID: %d", sessionToken, userID)
 }
 
-// Helper function to respond with error
 func respondWithError(w http.ResponseWriter, message, field string, statusCode int) {
 	w.WriteHeader(statusCode)
 	json.NewEncoder(w).Encode(model.Response{
@@ -227,7 +205,6 @@ const userContextKey contextKey = "user"
 
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Reuse ValidateSession logic here
 		valid, user, _, _ := utils.ValidateSession(w, r)
 		if !valid {
 			respondJSON(w, http.StatusUnauthorized, map[string]any{
@@ -240,3 +217,4 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
+

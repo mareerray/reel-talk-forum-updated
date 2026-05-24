@@ -89,7 +89,7 @@ func isValidCharacter(char rune) bool {
 
 func EmailNotTaken(DB *sql.DB, email string) (bool, error) {
 	var count int
-	err := DB.QueryRow("SELECT COUNT(*) FROM users WHERE email = ?", email).Scan(&count)
+	err := DB.QueryRow("SELECT COUNT(*) FROM users WHERE email = $1", email).Scan(&count)
 	if err != nil {
 		return false, fmt.Errorf("error checking email: %w", err)
 	}
@@ -97,12 +97,11 @@ func EmailNotTaken(DB *sql.DB, email string) (bool, error) {
 }
 
 func NicknameNotTaken(DB *sql.DB, nickname string) (bool, error) {
-
 	if DB == nil {
 		return false, fmt.Errorf("database connection is nil123")
 	}
 	var count int
-	err := DB.QueryRow("SELECT COUNT(*) FROM users WHERE nickname = ?", nickname).Scan(&count)
+	err := DB.QueryRow("SELECT COUNT(*) FROM users WHERE nickname = $1", nickname).Scan(&count)
 	if err != nil {
 		return false, fmt.Errorf("error checking nickname: %w", err)
 	}
@@ -138,10 +137,9 @@ func ValidatePassword(password string) error {
 func ValidateSession(w http.ResponseWriter, r *http.Request) (bool, model.User, string, error) {
 	var sessionToken string
 
-	// 1. Check Authorization header first
 	if authHeader := r.Header.Get("Authorization"); authHeader != "" {
 		sessionToken = strings.TrimPrefix(authHeader, "Bearer ")
-	} else if cookie, err := r.Cookie("session_token"); err == nil { // 2. Fallback to cookie
+	} else if cookie, err := r.Cookie("session_token"); err == nil {
 		sessionToken = cookie.Value
 	}
 	log.Println("Validating session token:", sessionToken)
@@ -160,8 +158,6 @@ func ValidateSession(w http.ResponseWriter, r *http.Request) (bool, model.User, 
 	}
 	log.Printf("[DEBUG] CurrentUserID: %d | UUID: %s", user.ID, user.UUID)
 
-
-	// Check if the cookie has expired
 	if time.Now().After(expirationTime) {
 		DeleteSession(sessionToken)
 		return false, model.User{}, "", nil
@@ -170,43 +166,34 @@ func ValidateSession(w http.ResponseWriter, r *http.Request) (bool, model.User, 
 }
 
 func SelectSession(sessionToken string) (model.User, time.Time, error) {
-
 	log.Printf("Validating session token: %s", sessionToken)
 
 	var user model.User
 	var expirationTime time.Time
 
-	// Adjusted SQL to match database schema
-	// utils.go
 	err := DB.QueryRow(`
-	SELECT u.id, u.uuid, u.nickname, s.session_expiry 
-	FROM sessions s
-	INNER JOIN users u ON s.user_id = u.id
-	WHERE s.session_token = ? 
-	AND s.is_active = true
-	AND s.session_expiry > ?`,
-		sessionToken, time.Now().Format(time.RFC3339),
+    SELECT u.id, u.uuid, u.nickname, s.session_expiry 
+    FROM sessions s
+    INNER JOIN users u ON s.user_id = u.id
+    WHERE s.session_token = $1
+    AND s.is_active = true
+    AND s.session_expiry > $2`,
+		sessionToken, time.Now(),
 	).Scan(&user.ID, &user.UUID, &user.Nickname, &expirationTime)
 
 	if err != nil {
-		log.Printf("Database error: %v", err) // Add this line
+		log.Printf("Database error: %v", err)
 		return model.User{}, time.Time{}, err
 	}
 	return user, expirationTime, nil
 }
 
 func DeleteSession(sessionToken string) error {
-
-	db := OpenDBConnection()
-	defer db.Close() // Close the connection after the function finishes
-	_, err := db.Exec(`DELETE FROM sessions WHERE session_token = ?`, sessionToken)
-
+	_, err := DB.Exec(`DELETE FROM sessions WHERE session_token = $1`, sessionToken)
 	if err != nil {
-		// Handle other database errors
 		log.Fatal(err)
 		return errors.New("database error")
 	}
-
 	return nil
-
 }
+

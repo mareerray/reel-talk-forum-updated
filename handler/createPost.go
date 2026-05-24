@@ -24,7 +24,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
     var userID int
     err := DB.QueryRow(`
         SELECT user_id FROM sessions
-        WHERE session_token = ?
+        WHERE session_token = $1
         AND is_active = true
         AND session_expiry > datetime('now')`, token).Scan(&userID)
     
@@ -72,7 +72,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
     
     categoryName := strings.TrimSpace(parts[0])
     var exists bool
-    err = DB.QueryRow("SELECT EXISTS(SELECT 1 FROM categories WHERE name = ?)", categoryName).Scan(&exists)
+    err = DB.QueryRow("SELECT EXISTS(SELECT 1 FROM categories WHERE name = $1)", categoryName).Scan(&exists)
     if err != nil || !exists {
         http.Error(w, "Invalid category: "+categoryName, http.StatusBadRequest)
         return
@@ -81,7 +81,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
     // Insert the post
     result, err := DB.Exec(`
         INSERT INTO posts (user_id, title, content, categories)
-        VALUES (?, ?, ?, ?)`,
+        VALUES ($1, $2, $3, $4)`,
         userID, req.Title, req.Content, req.Categories)
     
     if err != nil {
