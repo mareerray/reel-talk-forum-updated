@@ -1,5 +1,5 @@
 .category-bar {
-  margin: 50px 0 20px;
+  margin: 100px 0 20px;
   width: 100%;
   overflow: hidden;
   grid-column: 1 / -1;
@@ -13,6 +13,7 @@
 .category-marquee {
   overflow: hidden;
   width: 100%;
+  max-width: 100%;
 }
 
 .category-track-wrapper {
@@ -27,6 +28,7 @@
   gap: 10px;
   flex-shrink: 0;
   min-width: 100%;
+  width: 100%;
   padding-right: 10px;
 }
 
@@ -36,6 +38,7 @@
 
 .category-chip {
   flex: 0 0 auto;
+  flex-shrink: 0;
   white-space: nowrap;
   border: none;
   /* border-radius: 999px; */
@@ -111,4 +114,11 @@
     padding: 8px 12px;
     font-size: 12px;
   }
+}
+
+.category-bar,
+.category-marquee,
+.category-track-wrapper,
+.category-track {
+  outline: 1px solid lime;
 }
