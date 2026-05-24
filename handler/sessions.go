@@ -13,43 +13,36 @@ import (
 )
 
 func CheckUserLoggedIn(r *http.Request) (bool, int) {
-	sessionToken, err := r.Cookie("session_token")
-	if err != nil {
-		return false, 0
-	}
+    sessionToken, err := r.Cookie("session_token")
+    if err != nil {
+        return false, 0
+    }
 
-	var userID int
-	var expiresAt time.Time
+    var userID int
+    var expiresAt time.Time
 
-	query := `
-    SELECT user_id, session_expiry 
-    FROM sessions 
+    query := `
+    SELECT user_id, session_expiry
+    FROM sessions
     WHERE session_token = $1
-    AND session_token = (
-        SELECT session_token 
-        FROM sessions AS s2 
-        WHERE s2.user_id = sessions.user_id 
-        ORDER BY session_expiry DESC 
-        LIMIT 1
-    )
-	`
+      AND is_active = true
+    `
 
-	err = DB.QueryRow(query, sessionToken.Value).Scan(&userID, &expiresAt)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return false, 0
-		}
-		log.Printf("Error checking session: %v", err)
-		return false, 0
-	}
+    err = DB.QueryRow(query, sessionToken.Value).Scan(&userID, &expiresAt)
+    if err != nil {
+        if err == sql.ErrNoRows {
+            return false, 0
+        }
+        log.Printf("Error checking session: %v", err)
+        return false, 0
+    }
 
-	if time.Now().After(expiresAt) {
-		// Session has expired
-		DeleteSession(sessionToken.Value)
-		return false, 0
-	}
+    if time.Now().After(expiresAt) {
+        DeleteSession(sessionToken.Value)
+        return false, 0
+    }
 
-	return true, userID
+    return true, userID
 }
 
 func InsertSession(session *model.Session) (*model.Session, error) {
@@ -103,30 +96,26 @@ func InsertSession(session *model.Session) (*model.Session, error) {
 	return session, nil
 }
 
+// -- Only insert a new session and does not delete old ones since we allow multiple sessions per user -- //
+
 func CreateSession(w http.ResponseWriter, userID int) error {
-	// First, invalidate any existing session for this user
-	_, err := DB.Exec("DELETE FROM sessions WHERE user_id = $1", userID)
-	if err != nil {
-		log.Printf("Error deleting old sessions: %v", err)
-	}
-	token, cookie, err := generateSessionToken()
-	if err != nil {
-		return err
-	}
+    token, cookie, err := generateSessionToken()
+    if err != nil {
+        return err
+    }
 
-	query := `
-    INSERT INTO sessions 
-    (user_id, session_token, session_expiry) 
-    VALUES ($1, $2, $3)
-	`
+    query := `
+    INSERT INTO sessions (user_id, session_token, session_expiry, is_active)
+    VALUES ($1, $2, $3, true)
+    `
 
-	_, err = DB.Exec(query, userID, token, cookie.Expires)
-	if err != nil {
-		return fmt.Errorf("failed to insert session: %v", err)
-	}
+    _, err = DB.Exec(query, userID, token, cookie.Expires)
+    if err != nil {
+        return fmt.Errorf("failed to insert session: %v", err)
+    }
 
-	http.SetCookie(w, cookie)
-	return nil
+    http.SetCookie(w, cookie)
+    return nil
 }
 
 // -- Non-Global Functions : Only happens in this package server -- //
@@ -160,53 +149,36 @@ func generateSessionToken() (string, *http.Cookie, error) {
 
 
 func ValidateSessionHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+    w.Header().Set("Content-Type", "application/json")
 
-	// Get token from header
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" {
-		http.Error(w, "Missing authorization header", http.StatusUnauthorized)
-		return
-	}
-	token := strings.TrimPrefix(authHeader, "Bearer ")
+    authHeader := r.Header.Get("Authorization")
+    if authHeader == "" {
+        http.Error(w, "Missing authorization header", http.StatusUnauthorized)
+        return
+    }
 
-	// Check session validity
-	var isValid bool
-	err := DB.QueryRow(`
-        SELECT EXISTS(
-            SELECT 1 
-            FROM sessions 
-            WHERE session_token = $1 
-            AND is_active = true 
-            AND session_expiry > datetime('now')
-        )`, token).Scan(&isValid)
+    token := strings.TrimPrefix(authHeader, "Bearer ")
 
-	if err != nil {
-		http.Error(w, "Database error", http.StatusInternalServerError)
-		return
-	}
+    var userID int
+    err := DB.QueryRow(`
+        SELECT user_id
+        FROM sessions
+        WHERE session_token = $1
+          AND is_active = true
+          AND session_expiry > NOW()
+    `, token).Scan(&userID)
 
-	if !isValid {
-		http.Error(w, "Invalid session", http.StatusUnauthorized)
-		return
-	}
+    if err != nil {
+        if err == sql.ErrNoRows {
+            http.Error(w, "Invalid session", http.StatusUnauthorized)
+            return
+        }
+        http.Error(w, "Database error", http.StatusInternalServerError)
+        return
+    }
 
-	json.NewEncoder(w).Encode(model.Response{Success: true})
-
-	// Get user ID associated with the session
-	var userID int
-	err = DB.QueryRow(`
-        SELECT user_id 
-        FROM sessions 
-        WHERE session_token = $1`, token).Scan(&userID)
-
-	if err != nil {
-		http.Error(w, "Database error", http.StatusInternalServerError)
-		return
-	}
-
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"success": true,
-		"user_id": userID,
-	})
+    json.NewEncoder(w).Encode(map[string]interface{}{
+        "success": true,
+        "user_id": userID,
+    })
 }
