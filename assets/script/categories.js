@@ -1,9 +1,10 @@
 document.addEventListener('DOMContentLoaded', function () {
   const track = document.getElementById('categoryTrack');
   const clone = document.getElementById('categoryTrackClone');
+  const cloneAgain = document.getElementById('categoryTrackCloneAgain');
   const wrapper = document.querySelector('.category-track-wrapper');
 
-  if (!track || !clone || !wrapper) return;
+  if (!track || !clone || !cloneAgain || !wrapper) return;
 
   fetch('/api/categories')
     .then(response => {
@@ -27,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       track.innerHTML = chipsHTML;
       clone.innerHTML = chipsHTML;
-
+      cloneAgain.innerHTML = chipsHTML;
       wrapper.addEventListener('click', function (event) {
         const chip = event.target.closest('.category-chip');
         if (!chip) return;

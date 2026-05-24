@@ -42,6 +42,13 @@ body.main-view .bg-container {
     overflow: auto;
 }
 
+#mainView,
+.main-container,
+.middle-container {
+  width: 100%;
+  max-width: 100%;
+}
+
 .main-container-main {
     display: grid;
     grid-template-columns: auto 40%;
@@ -52,6 +59,7 @@ body.main-view .bg-container {
     .main-container-main {
         grid-template-columns: 1fr 38%;
         gap: 10px;
+        padding: 0 30px;
     }
 }
 
@@ -78,7 +86,7 @@ body.main-view .bg-container {
 
 .middle-container {
     border-radius: 8px;
-    padding: 24px 12px;
+    padding: 24px 40px;
     width: 100%;             /* ensure it fills the grid area */
     box-sizing: border-box;
 }
