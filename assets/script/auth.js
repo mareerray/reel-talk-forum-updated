@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (sessionStorage.getItem('sessionToken')) {
       const userNickname = sessionStorage.getItem('userNickname') || 'User';
       navMenu.innerHTML = `
-        <li><span class="user-display">User : ${userNickname}</span></li>
+        <li><span class="user-display">Welcome, 🍿 ${userNickname}!</span></li>
         <li><a href="#" id="logout-button" aria-label="Log out" title="Log out">
           <i class="material-icons" aria-hidden="true">logout</i>
         </a></li>

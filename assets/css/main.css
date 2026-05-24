@@ -146,7 +146,7 @@ body.main-view .bg-container {
 
 .page-title {
     margin-top: 50px;
-    font-size: 2rem;
+    font-size: 1.5rem;
     color: white !important;
     text-align: center;
 }
@@ -393,7 +393,7 @@ p {
 .user-display {
     color: #fff; /* Adjust color to match your theme */
     margin-right: 30px;
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
 
 .profile-tab-container {
