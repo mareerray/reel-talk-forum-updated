@@ -123,5 +123,5 @@
 .category-marquee,
 .category-track-wrapper,
 .category-track {
-  outline: 1px solid rgba(255, 255, 255, 0.08);
+  outline: 2px solid rgba(255, 255, 255, 0.08);
 }
