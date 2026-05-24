@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="/assets/css/templates.css">
     <link rel="stylesheet" href="/assets/css/main.css">
     <link rel="stylesheet" href="/assets/css/auth.css">
+    <link rel="stylesheet" href="/assets/css/category.css">
     <link rel="stylesheet" href="/assets/css/chat.css">
     <link rel="stylesheet" href="/assets/css/inline-styles.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -48,19 +49,27 @@
 
     <!------Main page----------------------------------------------------------------------------------------->
 
-    <div id="mainView" class="main-view-hidden">
+    <!-- <div id="mainView" class="main-view-hidden"> -->
+
         <div class="main-container">
             <!-- Categories Sidebar -->
             <div class="category-bar">
                 <h3>Categories</h3>
-                <ul>
-                    <!-- "All Movies" Button -->
+
+                <div class="category-marquee" aria-label="Category carousel">
+                    <div class="category-track" id="categoryTrack">
+                    <!-- chips will be injected here -->
+                    </div>
+                </div>
+            </div>                
+                <!-- <ul>
+                    <!-- "All Movies" Button 
                     <li>
                     <button type="button" class="all-movies">
                         <span>🎬</span> All Genres
                     </button>
                     </li>                    
-                </ul>
+                </ul> -->
             </div>
             
             <!-- Posts Feed --> 
