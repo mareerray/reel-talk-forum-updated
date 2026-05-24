@@ -139,3 +139,29 @@ footer nav ul li a:hover {
 footer nav ul li span.material-icons {
     font-size: 12px; 
 }
+
+
+@media (max-width: 768px) {
+  .header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+  }
+
+  .logo {
+    order: 0;
+    flex: 1;
+    text-align: left;
+  }
+
+  nav {
+    order: 0;
+    flex-shrink: 0;
+  }
+
+  nav ul {
+    justify-content: flex-start;
+    gap: 8px;
+  }
+}
