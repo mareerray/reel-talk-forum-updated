@@ -12,15 +12,22 @@
   width: 100%;
 }
 
-.category-track {
+.category-track-wrapper {
   display: flex;
-  gap: 10px;
   width: max-content;
   animation: scrollCategories 22s linear infinite;
   will-change: transform;
 }
 
-.category-track:hover {
+.category-track {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+  min-width: 100%;
+  padding-right: 10px;
+}
+
+.category-track-wrapper:hover {
   animation-play-state: paused;
 }
 

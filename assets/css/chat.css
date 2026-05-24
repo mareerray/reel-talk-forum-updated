@@ -170,29 +170,30 @@
     border: 1px solid #ccc;
     border-radius: 5px;
     margin-right: 0;
-    height: 40px;
+    height: 45px;
     min-width: 0;
     box-sizing: border-box;
 }
 
-.message-input button {
+#sendButton {
     padding: 0 20px;
     background-color: rgb(131, 30, 30);
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    min-width: 60px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
     font-size: 0.8rem;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.message-input button:hover {
+#sendButton:hover {
     background-color: #9a1b14;
 }
+
 
 #typing-indicator {
     color: #555;

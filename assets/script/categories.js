@@ -1,7 +1,9 @@
 document.addEventListener('DOMContentLoaded', function () {
   const track = document.getElementById('categoryTrack');
+  const clone = document.getElementById('categoryTrackClone');
+  const wrapper = document.querySelector('.category-track-wrapper');
 
-  if (!track) return;
+  if (!track || !clone || !wrapper) return;
 
   fetch('/api/categories')
     .then(response => {
@@ -9,30 +11,26 @@ document.addEventListener('DOMContentLoaded', function () {
       return response.json();
     })
     .then(categories => {
-      const chips = [];
-
-      const allChip = `
+      let chipsHTML = `
         <button type="button" class="category-chip" data-category="All">
           🎬 All Genres
         </button>
       `;
-      chips.push(allChip);
 
       categories.forEach(category => {
-        chips.push(`
+        chipsHTML += `
           <button type="button" class="category-chip" data-category="${category.name}">
             ${category.emoji} ${category.name}
           </button>
-        `);
+        `;
       });
 
-      const html = chips.join('');
-      track.innerHTML = html + html;
+      track.innerHTML = chipsHTML;
+      clone.innerHTML = chipsHTML;
 
-      track.addEventListener('click', function (event) {
+      wrapper.addEventListener('click', function (event) {
         const chip = event.target.closest('.category-chip');
         if (!chip) return;
-
         filterPostsByCategory(chip.dataset.category);
       });
     })
@@ -40,6 +38,9 @@ document.addEventListener('DOMContentLoaded', function () {
       console.error('Error fetching categories:', error);
     });
 });
+
+
+
 // document.addEventListener('DOMContentLoaded', function() {
 //     // Select the "All Genres" button
 //     const allGenresBtn = document.querySelector('.all-movies');
