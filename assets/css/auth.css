@@ -21,14 +21,6 @@ body {
     margin: 0;
 }
 
-#authView {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 1rem;
-}
-
 body.auth-view .bg-container {
     display: none !important;
 }
@@ -80,6 +72,22 @@ a {
     opacity: 0.9;
     border-radius: 12px;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+#logInFormContainer {
+    display: flex;
+}
+
+#signUpFormContainer {
+    display: none;
+}
+
+#switchToLogin {
+    display: none;
+}
+
+#switchToSignup {
+    display: flex;
 }
 
 .form-container {
@@ -183,6 +191,9 @@ a {
     box-sizing: border-box;
 }
 
+#nickNameGroup { display: flex; }
+#emailGroup { display: none; }
+
 .input-group label {
     font-size: 14px;
     margin-bottom: 5px;
@@ -281,10 +292,6 @@ input {
     display: none;
     flex-direction: column;
     justify-content: center;
-}
-
-#switchToSignup {
-    display: flex;
 }
 
 .switch-panel h1 {

@@ -12,13 +12,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const signUpForm = document.getElementById('signUpForm');
   const logInForm = document.getElementById('logInForm');
 
+  if (nickNameRadio) nickNameRadio.addEventListener('change', toggleFields);
+  if (emailRadio) emailRadio.addEventListener('change', toggleFields);
+  toggleFields();
+
   function toggleFields() {
     if (nickNameRadio && nickNameRadio.checked) {
-      if (nickNameGroup) nickNameGroup.style.display = 'flex';
-      if (emailGroup) emailGroup.style.display = 'none';
+        if (nickNameGroup) nickNameGroup.style.display = 'flex';
+        if (emailGroup) emailGroup.style.display = 'none';
     } else if (emailRadio && emailRadio.checked) {
-      if (nickNameGroup) nickNameGroup.style.display = 'none';
-      if (emailGroup) emailGroup.style.display = 'flex';
+        if (nickNameGroup) nickNameGroup.style.display = 'none';
+        if (emailGroup) emailGroup.style.display = 'flex';
+    } else {
+        if (nickNameGroup) nickNameGroup.style.display = 'flex';
+        if (emailGroup) emailGroup.style.display = 'none';
     }
   }
 
@@ -39,6 +46,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (switchToSignup) switchToSignup.style.display = 'none';
     if (switchToLogin) switchToLogin.style.display = 'block';
   }
+
+  if (signUpButton) signUpButton.addEventListener('click', showSignUp);
+  if (signInButton) signInButton.addEventListener('click', showSignIn);
+
 
   function updateNavMenu() {
     const navMenu = document.getElementById('nav-menu');
