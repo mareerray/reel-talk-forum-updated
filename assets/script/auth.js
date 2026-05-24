@@ -381,7 +381,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (mainView) mainView.style.display = 'none';
     document.body.classList.add('auth-view');
   }
-
+  showSignIn();
+  toggleFields();
   updateNavMenu();
 });
 
