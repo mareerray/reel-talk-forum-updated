@@ -12,6 +12,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const signUpForm = document.getElementById('signUpForm');
   const logInForm = document.getElementById('logInForm');
 
+  if (nickNameRadio) nickNameRadio.addEventListener("change", toggleFields);
+  if (emailRadio) emailRadio.addEventListener("change", toggleFields);
+
+  toggleFields();
+
   function showSignIn() {
     if (signUpFormContainer) signUpFormContainer.style.display = 'none';
     if (logInFormContainer) logInFormContainer.style.display = 'flex';
@@ -80,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-
   function toggleFields() {
     if (nickNameRadio && nickNameRadio.checked) {
       if (nickNameGroup) nickNameGroup.style.display = "flex";
@@ -90,9 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (emailGroup) emailGroup.style.display = "flex";
     }
   }
-
-  if (nickNameRadio) nickNameRadio.addEventListener("change", toggleFields);
-  if (emailRadio) emailRadio.addEventListener("change", toggleFields);
 
   if (signUpForm) {
     signUpForm.addEventListener('submit', function(e) {
